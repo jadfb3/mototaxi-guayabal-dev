@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>Moto Taxi Guayabal · Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background: #0a0f17; background: radial-gradient(circle at 30% 20%, #1f2b3a, #0b111a); min-height: 100vh; padding: 1.2rem; color: #eef2f5; }
+        .dashboard { max-width: 1400px; margin: 0 auto; }
+        .header-pro { background: rgba(18,28,42,0.75); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(245,176,100,0.25); border-radius: 60px; padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; box-shadow: 0 20px 40px -15px #00000080; }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .logo-pro { width: 56px; height: 56px; background: linear-gradient(145deg, #f5b064, #d68f44); border-radius: 40px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #0d1a24; box-shadow: 0 8px 18px -6px #b56f2e; }
+        .header-title h1 { font-size: 1.8rem; font-weight: 600; color: #fadcb0; line-height: 1.2; }
+        .header-title p { color: #9ab0c9; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+        .header-right { display: flex; align-items: center; gap: 16px; }
+        .date-badge { background: #1f3142; border: 1px solid #f5b06440; border-radius: 40px; padding: 0.6rem 1.5rem; font-size: 0.9rem; color: #f5d7a3; }
+
+        /* NAVEGACIÓN PRINCIPAL */
+        .main-nav { display: flex; gap: 0.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem; }
+        .nav-btn { background: rgba(18,28,40,0.7); border: 1px solid #4f637b; color: #9ab0c9; padding: 0.9rem 2rem; border-radius: 40px; font-size: 0.95rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+        .nav-btn.active { background: #f5b064; border-color: #f5b064; color: #0d1a24; }
+        .nav-btn:hover { border-color: #f5b064; color: #f5d7a3; }
+
+        /* SECCIONES */
+        .seccion { display: none; }
+        .seccion.activa { display: block; }
+
+        /* STATS */
+        .stats-pro { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-pro-card { background: rgba(18,28,40,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(245,176,100,0.2); border-radius: 48px; padding: 1.5rem; display: flex; align-items: center; gap: 1.2rem; transition: 0.2s; }
+        .stat-pro-card:hover { border-color: #f5b064; background: rgba(25,38,55,0.8); }
+        .stat-pro-icon { width: 64px; height: 64px; background: #f5b06415; border-radius: 40px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #f5b064; border: 1px solid #f5b06440; }
+        .stat-pro-content h3 { font-size: 2rem; font-weight: 700; color: #fadcb0; }
+        .stat-pro-content p { color: #b9c8dd; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-pro-trend { font-size: 0.7rem; color: #2ecc71; margin-top: 4px; }
+
+        /* PANEL MOTORIZADOS */
+        .control-panel { background: rgba(10,18,28,0.5); backdrop-filter: blur(8px); border-radius: 60px; padding: 1.8rem; border: 1px solid #f5b06420; margin-bottom: 2rem; }
+        .panel-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem; }
+        .tab-btn { background: transparent; border: 1px solid #4f637b; color: #9ab0c9; padding: 0.8rem 2rem; border-radius: 40px; font-size: 0.9rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .tab-btn.active { background: #f5b064; border-color: #f5b064; color: #0d1a24; }
+        .tab-btn:hover { border-color: #f5b064; color: #f5d7a3; }
+        .filters-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+        .search-box { background: #1b2938; border: 1px solid #4f637b40; border-radius: 60px; padding: 0.6rem 1.5rem; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 250px; }
+        .search-box i { color: #f5b064; }
+        .search-box input { background: transparent; border: none; color: white; width: 100%; outline: none; font-size: 0.95rem; }
+        .btn-nuevo { background: #f5b064; border: none; color: #0d1a24; font-weight: 600; padding: 0.8rem 2rem; border-radius: 60px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.95rem; box-shadow: 0 8px 18px -6px #b56f2e; transition: 0.1s; }
+        .btn-nuevo:active { transform: scale(0.97); }
+        .drivers-pro { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .driver-pro-card { background: rgba(18,28,40,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(245,176,100,0.15); border-radius: 48px; padding: 1.5rem; transition: 0.2s; }
+        .driver-pro-card:hover { border-color: #f5b064; background: rgba(25,38,55,0.85); transform: translateY(-4px); }
+        .driver-pro-card.desactivado { opacity: 0.5; border-color: #c0392b40 !important; }
+        .driver-pro-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+        .driver-pro-info { display: flex; align-items: center; gap: 12px; }
+        .driver-pro-avatar { width: 56px; height: 56px; background: #253544; border-radius: 40px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #f5b064; border: 2px solid #f5b06460; }
+        .driver-pro-name h4 { font-size: 1.2rem; font-weight: 600; color: #f0deb0; }
+        .driver-pro-name span { font-size: 0.8rem; color: #9ab0c9; }
+        .status-pro { padding: 0.3rem 1rem; border-radius: 60px; font-size: 0.8rem; font-weight: 600; }
+        .status-pro.online { background: #1e4a2e; color: #8de0a0; border: 1px solid #2ecc7160; }
+        .status-pro.busy { background: #a75f1e; color: #facc8c; border: 1px solid #f39c1260; }
+        .status-pro.offline { background: #462b2b; color: #f0a0a0; border: 1px solid #c0392b60; }
+        .driver-pro-details { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 1rem 0; padding: 1rem 0; border-top: 1px solid #273b4b; border-bottom: 1px solid #273b4b; }
+        .detail-item { display: flex; align-items: center; gap: 8px; color: #b9c8dd; font-size: 0.9rem; }
+        .detail-item i { color: #f5b064; width: 20px; }
+        .driver-pro-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+        .earnings { display: flex; flex-direction: column; }
+        .earnings small { font-size: 0.7rem; color: #9ab0c9; }
+        .earnings strong { font-size: 1.2rem; color: #f5b064; }
+        .btn-toggle { padding: 0.5rem 1.2rem; border-radius: 40px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; font-weight: 600; }
+        .btn-toggle.activar { background: #2ecc7130; border: 1px solid #2ecc7160; color: #8de0a0; }
+        .btn-toggle.activar:hover { background: #2ecc7150; }
+        .btn-toggle.desactivar { background: #c0392b30; border: 1px solid #c0392b60; color: #f0a0a0; }
+        .btn-toggle.desactivar:hover { background: #c0392b50; }
+
+        /* GRÁFICO */
+        .activity-chart { background: rgba(10,18,28,0.5); border-radius: 48px; padding: 1.5rem; border: 1px solid #f5b06420; margin-bottom: 2rem; }
+        .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+        .chart-bars { display: flex; align-items: flex-end; justify-content: space-around; height: 120px; gap: 8px; }
+        .bar-container { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+        .bar { width: 100%; background: linear-gradient(to top, #f5b064, #d68f44); border-radius: 20px 20px 8px 8px; min-height: 4px; }
+        .bar-label { font-size: 0.7rem; color: #9ab0c9; }
+
+        /* PAGOS / CARRERAS */
+        .payments-section { background: rgba(18,28,40,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(245,176,100,0.2); border-radius: 48px; padding: 1.5rem; margin-bottom: 2rem; }
+        .payment-item { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid #273b4b; flex-wrap: wrap; gap: 0.5rem; }
+        .payment-item:last-child { border-bottom: none; }
+        .payment-info { display: flex; align-items: center; gap: 12px; }
+        .payment-avatar { width: 40px; height: 40px; background: #253544; border-radius: 30px; display: flex; align-items: center; justify-content: center; color: #f5b064; }
+        .payment-details h4 { font-size: 1rem; color: #f0deb0; }
+        .payment-details span { font-size: 0.8rem; color: #9ab0c9; }
+        .payment-amount { font-size: 1.1rem; font-weight: 600; color: #f5b064; }
+        .btn-pay { background: #2ecc7130; border: 1px solid #2ecc7160; color: #8de0a0; padding: 0.4rem 1.2rem; border-radius: 40px; font-size: 0.8rem; cursor: pointer; }
+        .races-section { background: rgba(10,18,28,0.5); border-radius: 48px; padding: 1.5rem; border: 1px solid #f5b06420; }
+        .race-item { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid #273b4b; }
+        .race-item:last-child { border-bottom: none; }
+        .race-driver { display: flex; align-items: center; gap: 10px; }
+        .race-dot { width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 10px #2ecc71; }
+        .race-dot.completed { background: #9ab0c9; box-shadow: none; }
+
+        /* SECCIÓN ZONAS */
+        .zonas-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .zonas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.2rem; margin-bottom: 2rem; }
+        .zona-card { background: rgba(18,28,40,0.7); border: 1px solid rgba(245,176,100,0.2); border-radius: 40px; padding: 1.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
+        .zona-card:hover { border-color: #f5b064; }
+        .zona-info h4 { font-size: 1.1rem; color: #f0deb0; font-weight: 600; }
+        .zona-info span { font-size: 0.85rem; color: #9ab0c9; }
+        .zona-precio { font-size: 1.4rem; font-weight: 700; color: #f5b064; }
+        .zona-acciones { display: flex; gap: 8px; margin-left: 1rem; }
+        .btn-zona-eliminar { background: #c0392b30; border: 1px solid #c0392b60; color: #f0a0a0; padding: 0.4rem 0.9rem; border-radius: 30px; font-size: 0.8rem; cursor: pointer; transition: 0.2s; }
+        .btn-zona-eliminar:hover { background: #c0392b50; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+        .modal-card { background: #1b2938; border-radius: 48px; max-width: 500px; width: 100%; padding: 2rem; border: 1px solid #f5b06460; box-shadow: 0 30px 50px -20px black; }
+        .modal-card h3 { font-size: 1.8rem; color: #fadcb0; margin-bottom: 0.3rem; }
+        .modal-card .sub { color: #b9c8dd; margin-bottom: 1.8rem; font-size: 0.9rem; }
+        .input-group { margin-bottom: 1.4rem; }
+        .input-group label { display: block; margin-bottom: 0.4rem; color: #f5d7a3; font-size: 0.9rem; }
+        .input-group input { width: 100%; padding: 1rem 1.2rem; border-radius: 40px; border: 1px solid #4f5f7050; background: #0f1a24; color: white; font-size: 1rem; }
+        .input-group input:focus { outline: none; border-color: #f5b064; background: #12222f; }
+        .modal-buttons { display: flex; gap: 1rem; margin-top: 2rem; }
+        .btn-save { background: #f5b064; border: none; color: #0d1a24; font-weight: 700; padding: 1rem; border-radius: 60px; flex: 2; cursor: pointer; font-size: 1rem; }
+        .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-cancel { background: transparent; border: 1px solid #f5b06460; color: #ddd; border-radius: 60px; flex: 1; cursor: pointer; }
+        .loading { text-align: center; color: #6b7f94; padding: 2rem; font-size: 0.9rem; grid-column: 1/-1; }
+
+        
+        /* SECCIÓN PEDIDOS */
+        .pedido-card { background: rgba(18,28,40,0.8); border: 1px solid rgba(245,176,100,0.2); border-radius: 40px; padding: 1.5rem; transition: 0.2s; position: relative; overflow: hidden; }
+        .pedido-card:hover { border-color: #f5b064; }
+        .pedido-card.pendiente { border-left: 5px solid #f5b064; }
+        .pedido-card.asignada  { border-left: 5px solid #2ecc71; }
+        .pedido-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; gap: 0.5rem; flex-wrap: wrap; }
+        .pedido-restaurante { font-size: 1.1rem; font-weight: 600; color: #f0deb0; }
+        .pedido-hora { font-size: 0.8rem; color: #9ab0c9; }
+        .badge-estado { padding: 0.3rem 1rem; border-radius: 60px; font-size: 0.8rem; font-weight: 600; }
+        .badge-pendiente { background: #3d2e0a; color: #facc8c; border: 1px solid #f39c1260; }
+        .badge-asignada  { background: #1e4a2e; color: #8de0a0; border: 1px solid #2ecc7160; }
+        .badge-abierto   { background: #1a3040; color: #f5d7a3; border: 1px solid #f5b06460; }
+        .badge-completado { background: #1a2f1a; color: #8de0a0; border: 1px solid #2ecc7140; }
+        .viaje-card { background: rgba(18,28,40,0.8); border: 1px solid rgba(245,176,100,0.2); border-radius: 40px; padding: 1.5rem; transition: 0.2s; position: relative; overflow: hidden; }
+        .viaje-card:hover { border-color: #f5b064; }
+        .viaje-card.abierto { border-left: 5px solid #f5b064; }
+        .viaje-card.asignada { border-left: 5px solid #2ecc71; }
+        .pedido-datos { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1rem; }
+        .pedido-dato { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #b9c8dd; }
+        .pedido-dato i { color: #f5b064; width: 16px; }
+        .pedido-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #273b4b; }
+        .select-moto { flex: 1; padding: 0.6rem 1rem; border-radius: 30px; border: 1px solid #4f637b; background: #1b2938; color: white; font-size: 0.88rem; min-width: 160px; }
+        .select-moto:focus { outline: none; border-color: #f5b064; }
+        .btn-asignar { background: #f5b064; border: none; color: #0d1a24; font-weight: 700; padding: 0.6rem 1.4rem; border-radius: 30px; cursor: pointer; font-size: 0.88rem; white-space: nowrap; }
+        .btn-asignar:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-completar { background: #2ecc7130; border: 1px solid #2ecc7160; color: #8de0a0; padding: 0.6rem 1.2rem; border-radius: 30px; cursor: pointer; font-size: 0.88rem; }
+        .btn-cancelar-pedido { background: #c0392b20; border: 1px solid #c0392b60; color: #f0a0a0; padding: 0.6rem 1rem; border-radius: 30px; cursor: pointer; font-size: 0.88rem; }
+        .pedidos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem; }
+        .stat-pedidos { background: #1f2e1a; border: 1px solid #2ecc7130; }
+        .nav-badge { background: #c0392b; color: white; border-radius: 60px; padding: 0.1rem 0.5rem; font-size: 0.7rem; font-weight: 700; margin-left: 4px; }
+
+        /* HISTORIAL PAGOS */
+        .pago-hist-item { display:flex; align-items:center; justify-content:space-between; padding:0.8rem 0; border-bottom:1px solid #273b4b; flex-wrap:wrap; gap:0.5rem; }
+        .pago-hist-item:last-child { border-bottom:none; }
+        .pago-hist-fecha { font-size:0.8rem; color:#9ab0c9; }
+        .pago-hist-monto { font-size:1rem; font-weight:600; color:#2ecc71; }
+        .pago-hist-nombre { font-size:0.95rem; color:#f0deb0; font-weight:500; }
+
+        @media (max-width: 700px) { .header-pro { flex-direction: column; text-align: center; } .header-left { flex-direction: column; } .filters-bar { flex-direction: column; } .search-box { width: 100%; } }
+    </style>
+</head>
+<body>
+<div class="dashboard">
+
+    <!-- HEADER -->
+    <div class="header-pro">
+        <div class="header-left">
+            <div class="logo-pro"><i class="fas fa-motorcycle"></i></div>
+            <div class="header-title">
+                <h1>Moto Taxi Guayabal · Panel</h1>
+                <p><i class="fas fa-circle" style="color:#2ecc71; font-size:0.5rem;"></i> Firebase conectado · tiempo real</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="date-badge" id="fechaHoy"><i class="far fa-calendar-alt"></i> ...</div>
+        </div>
+    </div>
+
+    <!-- NAVEGACIÓN PRINCIPAL -->
+    <div class="main-nav">
+        <button class="nav-btn" data-seccion="viajes"><i class="fas fa-motorcycle"></i> Moto Taxi <span class="nav-badge" id="badgeViajes" style="display:none">0</span></button>
+        
+        <button class="nav-btn active" data-seccion="motorizados"><i class="fas fa-users"></i> Motorizados</button>
+        
+        <button class="nav-btn" data-seccion="zonas"><i class="fas fa-map-marker-alt"></i> Zonas</button>
+        <button class="nav-btn" data-seccion="clientes"><i class="fas fa-users"></i> Clientes</button>
+        <button class="nav-btn" data-seccion="configuracion"><i class="fas fa-cog"></i> Configuración</button>
+    </div>
+
+    <!-- ══════════ SECCIÓN VIAJES (MOTO TAXI) ══════════ -->
+    <div class="seccion" id="seccion-viajes">
+
+        <div class="stats-pro" style="grid-template-columns: repeat(auto-fit, minmax(180px,1fr));">
+            <div class="stat-pro-card">
+                <div class="stat-pro-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-pro-content"><h3 id="statViajesPendientes">0</h3><p>Sin asignar</p><div class="stat-pro-trend">esperando moto</div></div>
+            </div>
+            <div class="stat-pro-card stat-pedidos">
+                <div class="stat-pro-icon" style="background:#2ecc7115; border-color:#2ecc7140;"><i class="fas fa-motorcycle" style="color:#2ecc71;"></i></div>
+                <div class="stat-pro-content"><h3 id="statViajesAsignados">0</h3><p>En camino</p><div class="stat-pro-trend" style="color:#2ecc71;">asignados</div></div>
+            </div>
+            <div class="stat-pro-card">
+                <div class="stat-pro-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-pro-content"><h3 id="statViajesHoy">0</h3><p>Completados hoy</p><div class="stat-pro-trend">del día</div></div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.8rem;">
+                <h3 style="color:#f5d7a3;"><i class="fas fa-route"></i> Viajes activos</h3>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="tab-btn active" data-filtro-viaje="todos">Todos</button>
+                    <button class="tab-btn" data-filtro-viaje="abierto">⏳ Sin asignar</button>
+                    <button class="tab-btn" data-filtro-viaje="asignada">🛵 En camino</button>
+                </div>
+            </div>
+            <div class="pedidos-grid" id="viajesContainer">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando viajes...</div>
+            </div>
+        </div>
+
+        <div class="races-section">
+            <h3 style="color:#f5d7a3; margin-bottom:1.5rem;"><i class="fas fa-history"></i> Últimos completados</h3>
+            <div id="viajesCompletadosContainer"><div class="loading">Sin viajes completados aún.</div></div>
+        </div>
+
+    </div>
+
+    <!-- ══════════ SECCIÓN PEDIDOS ══════════ -->
+    <div class="seccion" id="seccion-pedidos">
+
+        <div class="stats-pro" style="grid-template-columns: repeat(auto-fit, minmax(180px,1fr));">
+            <div class="stat-pro-card">
+                <div class="stat-pro-icon"><i class="fas fa-clock"></i></div>
+                <div class="stat-pro-content"><h3 id="statPendientes">0</h3><p>Pendientes</p><div class="stat-pro-trend">sin asignar</div></div>
+            </div>
+            <div class="stat-pro-card stat-pedidos">
+                <div class="stat-pro-icon" style="background:#2ecc7115; border-color:#2ecc7140;"><i class="fas fa-motorcycle" style="color:#2ecc71;"></i></div>
+                <div class="stat-pro-content"><h3 id="statAsignados">0</h3><p>En camino</p><div class="stat-pro-trend" style="color:#2ecc71;">asignados</div></div>
+            </div>
+            <div class="stat-pro-card">
+                <div class="stat-pro-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-pro-content"><h3 id="statCompletados">0</h3><p>Completados hoy</p><div class="stat-pro-trend">del día</div></div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.8rem;">
+                <h3 style="color:#f5d7a3;"><i class="fas fa-list-alt"></i> Pedidos activos</h3>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="tab-btn active" data-filtro-pedido="todos">Todos</button>
+                    <button class="tab-btn" data-filtro-pedido="pendiente">⏳ Sin asignar</button>
+                    <button class="tab-btn" data-filtro-pedido="asignada">🛵 En camino</button>
+                </div>
+            </div>
+            <div class="pedidos-grid" id="pedidosContainer">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando pedidos...</div>
+            </div>
+        </div>
+
+        <div class="races-section">
+            <h3 style="color:#f5d7a3; margin-bottom:1.5rem;"><i class="fas fa-history"></i> Últimos completados</h3>
+            <div id="completadosContainer"><div class="loading">Sin pedidos completados aún.</div></div>
+        </div>
+
+    </div>
+
+    <!-- ══════════ SECCIÓN MOTORIZADOS ══════════ -->
+    <div class="seccion activa" id="seccion-motorizados">
+
+        <div class="stats-pro">
+            <div class="stat-pro-card">
+                <div class="stat-pro-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-pro-content"><h3 id="statTotal">0</h3><p>Motorizados</p><div class="stat-pro-trend"><i class="fas fa-database"></i> desde Firebase</div></div>
+            </div>
+            <div class="stat-pro-card">
+                <div class="stat-pro-icon"><i class="fas fa-circle" style="color:#2ecc71;font-size:1.5rem;"></i></div>
+                <div class="stat-pro-content"><h3 id="statActivos">0</h3><p>Activos ahora</p><div class="stat-pro-trend"><i class="fas fa-bolt"></i> en tiempo real</div></div>
+            </div>
+            <div class="stat-pro-card">
+                <div class="stat-pro-icon"><i class="fas fa-route"></i></div>
+                <div class="stat-pro-content"><h3 id="statCarreras">0</h3><p>En carrera</p><div class="stat-pro-trend"><i class="fas fa-map-marker-alt"></i> actualmente</div></div>
+            </div>
+
+        </div>
+
+        <div class="control-panel">
+            <div class="panel-tabs">
+                <button class="tab-btn active" data-tab="todos">Todos</button>
+                <button class="tab-btn" data-tab="disponible">Activos</button>
+                <button class="tab-btn" data-tab="en carrera">En carrera</button>
+                <button class="tab-btn" data-tab="desconectado">Desconectados</button>
+            </div>
+            <div class="filters-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscador" placeholder="Buscar por nombre o teléfono...">
+                </div>
+                <button class="btn-nuevo" id="openModalBtn"><i class="fas fa-plus-circle"></i> Nuevo motorizado</button>
+            </div>
+            <div class="drivers-pro" id="driversContainer">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando desde Firebase...</div>
+            </div>
+        </div>
+
+
+
+
+
+        <div class="races-section">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.8rem;">
+                <h3 style="color:#f5d7a3;"><i class="fas fa-history"></i> Historial de viajes por motorizado</h3>
+                <select id="filtroMotoHistorial" style="background:#1b2938; border:1px solid #f5b06440; border-radius:30px; padding:0.5rem 1.2rem; color:#f5d7a3; font-size:0.9rem; cursor:pointer;">
+                    <option value="">— Selecciona un motorizado —</option>
+                </select>
+            </div>
+            <div id="historialMotoContainer"><div class="loading"><i class="fas fa-inbox"></i> Selecciona un motorizado para ver su historial</div></div>
+        </div>
+
+    </div>
+
+    <!-- ══════════ SECCIÓN RESTAURANTES ══════════ -->
+    <div class="seccion" id="seccion-restaurantes">
+        <div class="payments-section">
+            <div class="zonas-header">
+                <h3 style="color:#f5d7a3;"><i class="fas fa-store"></i> Restaurantes disponibles</h3>
+                <button class="btn-nuevo" id="openModalRestaurante"><i class="fas fa-plus-circle"></i> Nuevo restaurante</button>
+            </div>
+            <div class="zonas-grid" id="restaurantesContainer">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando restaurantes...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════ SECCIÓN ZONAS ══════════ -->
+    <div class="seccion" id="seccion-zonas">
+        <div class="payments-section">
+            <div class="zonas-header">
+                <h3 style="color:#f5d7a3;"><i class="fas fa-map-marker-alt"></i> Zonas y precios de delivery</h3>
+                <button class="btn-nuevo" id="openModalZona"><i class="fas fa-plus-circle"></i> Nueva zona</button>
+            </div>
+            <div class="zonas-grid" id="zonasContainer">
+                <div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando zonas...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════ SECCIÓN CLIENTES ══════════ -->
+    <div class="seccion" id="seccion-clientes">
+        <div class="payments-section">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.8rem;">
+                <h3 style="color:#f5d7a3;"><i class="fas fa-users"></i> Clientes registrados</h3>
+                <div class="search-box" style="max-width:300px;">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="buscadorClientes" placeholder="Buscar por nombre o teléfono...">
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:1.5rem;">
+                <div class="stat-pro-card">
+                    <div class="stat-pro-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-pro-content"><h3 id="statTotalClientes">0</h3><p>Clientes</p><div class="stat-pro-trend">registrados</div></div>
+                </div>
+                <div class="stat-pro-card">
+                    <div class="stat-pro-icon"><i class="fas fa-route"></i></div>
+                    <div class="stat-pro-content"><h3 id="statTotalViajesClientes">0</h3><p>Viajes totales</p><div class="stat-pro-trend">acumulados</div></div>
+                </div>
+            </div>
+            <div id="clientesContainer"><div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando clientes...</div></div>
+        </div>
+    </div>
+
+    <!-- ══════════ SECCIÓN CONFIGURACIÓN ══════════ -->
+    <div class="seccion" id="seccion-configuracion">
+        <div class="payments-section">
+            <div class="zonas-header">
+                <h3 style="color:#f5d7a3;"><i class="fas fa-cog"></i> Configuración general</h3>
+            </div>
+
+            <!-- Comisión -->
+            <div style="background:#1b2938; border-radius:30px; padding:1.5rem; margin-bottom:1.2rem; border:1px solid #f5b06430;">
+                <h4 style="color:#f5d7a3; margin-bottom:0.3rem;"><i class="fas fa-coins" style="color:#f5b064; margin-right:8px;"></i> Comisión del motorizado</h4>
+                <p style="color:#9ab0c9; font-size:0.85rem; margin-bottom:1.2rem;">Porcentaje que se descuenta de cada entrega como comisión.</p>
+                <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; flex:1; min-width:180px;">
+                        <input type="number" id="inputComision" min="1" max="50" step="1" value="10"
+                            style="width:100px; padding:0.8rem 1rem; border-radius:20px; border:1px solid #f5b06460; background:#0f1a24; color:#fadcb0; font-size:1.4rem; font-weight:700; text-align:center;">
+                        <span style="font-size:1.4rem; color:#f5d7a3; font-weight:700;">%</span>
+                        <span style="font-size:0.85rem; color:#9ab0c9; margin-left:0.5rem;" id="comisionPreview">= $0.80 por cada $8.00</span>
+                    </div>
+                    <button id="btnGuardarComision" class="btn-nuevo" style="min-width:140px;">
+                        <i class="fas fa-save"></i> Guardar
+                    </button>
+                </div>
+                <div id="comisionActualBadge" style="margin-top:1rem; font-size:0.85rem; color:#8de0a0;">
+                    <i class="fas fa-check-circle"></i> Comisión actual: <strong id="comisionActualValor">10%</strong>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL MOTORIZADO -->
+<div class="modal-overlay" id="modalRegistro">
+    <div class="modal-card">
+        <h3><i class="fas fa-user-plus"></i> Alta de motorizado</h3>
+        <div class="sub">completa los datos para generar acceso</div>
+        <div class="input-group"><label><i class="fas fa-user"></i> Nombre completo</label><input type="text" id="regNombre" placeholder="ej. José Pérez"></div>
+        <div class="input-group"><label><i class="fas fa-id-card"></i> Número de cédula</label><input type="text" id="regCedula" placeholder="ej. V-12345678" inputmode="numeric"></div>
+        <div class="input-group"><label><i class="fas fa-phone-alt"></i> Teléfono</label><input type="tel" id="regTelefono" placeholder="0412 1234567"></div>
+        <div class="input-group"><label><i class="fas fa-motorcycle"></i> Vehículo / Placa</label><input type="text" id="regVehiculo" placeholder="Bera S200 · ABC123"></div>
+        <div class="input-group"><label><i class="fas fa-lock"></i> PIN de acceso (4 dígitos)</label><input type="text" id="regPin" placeholder="1234" maxlength="4" inputmode="numeric"></div>
+        <div class="modal-buttons">
+            <button class="btn-save" id="guardarMotorizado"><i class="fas fa-save"></i> Guardar</button>
+            <button class="btn-cancel" id="cancelarModal"><i class="fas fa-times"></i> Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ZONA -->
+<div class="modal-overlay" id="modalZona">
+    <div class="modal-card">
+        <h3 id="modalZonaTitulo"><i class="fas fa-map-marker-alt"></i> Nueva zona</h3>
+        <div class="sub" id="modalZonaSub">agrega una zona con su precio de delivery</div>
+        <div class="input-group"><label><i class="fas fa-map-pin"></i> Nombre de la zona</label><input type="text" id="zonaNombre" placeholder="ej. Biruaca"></div>
+        <div class="input-group"><label><i class="fas fa-dollar-sign"></i> Precio del delivery</label><input type="number" id="zonaPrecio" placeholder="ej. 3.00" step="0.50" min="0"></div>
+        <input type="hidden" id="zonaEditId" value="">
+        <div class="modal-buttons">
+            <button class="btn-save" id="guardarZona"><i class="fas fa-save"></i> Guardar</button>
+            <button class="btn-cancel" id="cancelarZona"><i class="fas fa-times"></i> Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL RESTAURANTE -->
+<div class="modal-overlay" id="modalRestaurante">
+    <div class="modal-card">
+        <h3><i class="fas fa-store"></i> Nuevo restaurante</h3>
+        <div class="sub">agrega un restaurante al selector del formulario</div>
+        <div class="input-group"><label><i class="fas fa-utensils"></i> Nombre del restaurante</label><input type="text" id="restNombre" placeholder="ej. Casa Barril (hamburguesas)"></div>
+        <div class="input-group"><label><i class="fas fa-smile"></i> Emoji (opcional)</label><input type="text" id="restEmoji" placeholder="ej. 🍔" maxlength="4"></div>
+        <div class="input-group"><label><i class="fab fa-whatsapp" style="color:#25D366;"></i> Número de WhatsApp</label><input type="tel" id="restTelefono" placeholder="ej. 04121234567"></div>
+        <div class="modal-buttons">
+            <button class="btn-save" id="guardarRestaurante"><i class="fas fa-save"></i> Guardar</button>
+            <button class="btn-cancel" id="cancelarRestaurante"><i class="fas fa-times"></i> Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, limit, getDocs, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB117FiWsQTCqbqC8LFPSzPKepHXn4eXcM",
+        authDomain: "delivery-e3221.firebaseapp.com",
+        projectId: "delivery-e3221",
+        storageBucket: "delivery-e3221.firebasestorage.app",
+        messagingSenderId: "555123509664",
+        appId: "1:555123509664:web:8aaaed8f301f81ecc93cc5",
+        measurementId: "G-RH3HJJ6QLZ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    document.getElementById('fechaHoy').innerHTML = `<i class="far fa-calendar-alt"></i> ${new Date().toLocaleDateString('es-VE')}`;
+
+    let todosMotorizados = [];
+    let tabActiva = 'todos';
+    let todosPedidos = [];
+    let filtroPedido = 'todos';
+
+    // ── NAVEGACIÓN PRINCIPAL ──
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activa'));
+            btn.classList.add('active');
+            document.getElementById(`seccion-${btn.dataset.seccion}`).classList.add('activa');
+        });
+    });
+
+    // ── FILTROS PEDIDOS ──
+    document.querySelectorAll('[data-filtro-pedido]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-filtro-pedido]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filtroPedido = btn.dataset.filtroPedido;
+            renderPedidos(todosPedidos);
+        });
+    });
+
+    // ── RENDER PEDIDOS ──
+    function renderPedidos(lista) {
+        const container = document.getElementById('pedidosContainer');
+        const activos = lista.filter(p => p.estado === 'pendiente' || p.estado === 'abierto' || p.estado === 'asignada');
+        const filtrados = filtroPedido === 'todos' ? activos : activos.filter(p => p.estado === filtroPedido);
+
+        // stats
+        document.getElementById('statPendientes').textContent = activos.filter(p => p.estado === 'pendiente').length;
+        document.getElementById('statAsignados').textContent  = activos.filter(p => p.estado === 'asignada').length;
+
+        // badge nav
+        const badge = document.getElementById('badgePedidos');
+        const sinAsignar = activos.filter(p => p.estado === 'pendiente').length;
+        badge.textContent = sinAsignar;
+        badge.style.display = sinAsignar > 0 ? 'inline' : 'none';
+
+        // completados hoy
+        const hoy = new Date().toDateString();
+        const completadosHoy = lista.filter(p => p.estado === 'completado' && p.fechaHora?.toDate && p.fechaHora.toDate().toDateString() === hoy);
+        document.getElementById('statCompletados').textContent = completadosHoy.length;
+
+        if (filtrados.length === 0) {
+            container.innerHTML = '<div class="loading"><i class="fas fa-inbox"></i><br>Sin pedidos en esta categoría</div>';
+            return;
+        }
+
+        const disponibles = todosMotorizados.filter(m => m.estado === 'disponible' && !m.desactivado);
+        const opcionesMotos = disponibles.length
+            ? disponibles.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')
+            : '<option value="" disabled>Sin motorizados disponibles</option>';
+
+        container.innerHTML = filtrados.map(p => {
+            const hora = p.fechaHora?.toDate ? p.fechaHora.toDate().toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+            const esPendiente = p.estado === 'pendiente';
+            const gpsBtn = p.cliente?.gps && p.cliente.gps !== 'No compartida'
+                ? `<a href="${p.cliente.gps}" target="_blank" style="color:#f5b064; font-size:0.8rem;"><i class="fas fa-map-marker-alt"></i> GPS</a>` : '';
+
+            return `
+            <div class="pedido-card ${p.estado}" data-pid="${p.id}">
+                <div class="pedido-header">
+                    <div>
+                        <div class="pedido-restaurante"><i class="fas fa-store" style="color:#f5b064; margin-right:6px;"></i>${p.restaurante || '—'}</div>
+                        <div class="pedido-hora"><i class="far fa-clock" style="margin-right:4px;"></i>${hora}</div>
+                    </div>
+                    <span class="badge-estado badge-${p.estado}">${esPendiente ? '⏳ Pendiente' : p.estado === 'abierto' ? '📡 Abierto' : '🛵 En camino'}</span>
+                </div>
+                <div class="pedido-datos">
+                    <div class="pedido-dato"><i class="fas fa-user"></i> ${p.cliente?.nombre || '—'}</div>
+                    <div class="pedido-dato"><i class="fas fa-phone-alt"></i> ${p.cliente?.telefono || '—'}</div>
+                    <div class="pedido-dato"><i class="fas fa-map-pin"></i> ${p.cliente?.barrio || '—'}</div>
+                    <div class="pedido-dato"><i class="fas fa-home"></i> ${(p.cliente?.direccion || '—').substring(0,28)}${p.cliente?.direccion?.length > 28 ? '…' : ''}</div>
+                </div>
+                ${p.motorizadoNombre ? `<div style="font-size:0.85rem; color:#8de0a0; margin-bottom:0.5rem;"><i class="fas fa-motorcycle"></i> Asignado: <strong>${p.motorizadoNombre}</strong></div>` : ''}
+                <div class="pedido-actions">
+                    ${gpsBtn}
+                    ${esPendiente ? `
+                        <button class="btn-abrir" data-pid="${p.id}" data-barrio="${p.cliente?.barrio || ''}"
+                            style="background:#1a3a4a; border:1px solid #f5b06460; color:#f5d7a3; padding:0.6rem 1.2rem; border-radius:30px; cursor:pointer; font-size:0.88rem; font-weight:600;">
+                            <i class="fas fa-broadcast-tower"></i> Abrir a motorizados
+                        </button>
+                        <select class="select-moto" id="moto-${p.id}">
+                            <option value="" disabled selected>O asignar directo...</option>
+                            ${opcionesMotos}
+                        </select>
+                        <button class="btn-asignar" data-pid="${p.id}" data-barrio="${p.cliente?.barrio || ''}"><i class="fas fa-motorcycle"></i> Asignar</button>
+                    ` : p.estado === 'abierto' ? `
+                        <span style="font-size:0.82rem; color:#f5b064;"><i class="fas fa-broadcast-tower"></i> Esperando que un motorizado acepte...</span>
+                    ` : `
+                        <span style="font-size:0.82rem; color:#8de0a0;"><i class="fas fa-motorcycle"></i> En camino · el motorizado confirma al entregar</span>
+                    `}
+                    <button class="btn-cancelar-pedido" data-pid="${p.id}" data-mid="${p.motorizadoId || ''}"><i class="fas fa-times"></i></button>
+                </div>
+            </div>`;
+        }).join('');
+
+        // Listeners abrir a motorizados
+        container.querySelectorAll('.btn-abrir').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const barrio = btn.dataset.barrio || '';
+                const matchPrecio = barrio.match(/\$([\d.]+)/);
+                const precio = matchPrecio ? parseFloat(matchPrecio[1]) : 0;
+                if (precio <= 0) { alert('Este pedido no tiene precio de zona definido.'); return; }
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                try {
+                    await updateDoc(doc(db, 'carreras', btn.dataset.pid), {
+                        estado: 'abierto',
+                        precioCobrado: precio
+                    });
+                } catch(e) { alert('Error al abrir la carrera.'); btn.disabled = false; }
+            });
+        });
+
+        // Listeners asignar
+        container.querySelectorAll('.btn-asignar').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const pid   = btn.dataset.pid;
+                const motoId = document.getElementById('moto-' + pid)?.value;
+                if (!motoId) { alert('Selecciona un motorizado.'); return; }
+                const moto = todosMotorizados.find(m => m.id === motoId);
+                btn.disabled = true;
+                // Extraer precio automáticamente del barrio (formato "Guyabal | $8.00")
+                const barrio = btn.dataset.barrio || '';
+                const matchPrecio = barrio.match(/\$([\d.]+)/);
+                const precio = matchPrecio ? parseFloat(matchPrecio[1]) : 0;
+                if (precio <= 0) { alert('No se pudo leer el precio de la zona. Verifica la zona del pedido.'); btn.disabled = false; return; }
+                try {
+                    await updateDoc(doc(db, 'carreras', pid), {
+                        estado: 'asignada',
+                        motorizadoId:     motoId,
+                        motorizadoNombre: moto?.nombre || '',
+                        precioCobrado:    precio
+                    });
+                    await updateDoc(doc(db, 'motorizados', motoId), { estado: 'en carrera' });
+                } catch(e) { alert('Error al asignar.'); btn.disabled = false; }
+            });
+        });
+
+        // Listeners cancelar
+        container.querySelectorAll('.btn-cancelar-pedido').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('¿Cancelar este pedido?')) return;
+                try {
+                    await updateDoc(doc(db, 'carreras', btn.dataset.pid), { estado: 'cancelado' });
+                    if (btn.dataset.mid) await updateDoc(doc(db, 'motorizados', btn.dataset.mid), { estado: 'disponible' });
+                } catch(e) { alert('Error al cancelar.'); }
+            });
+        });
+    }
+
+    // ── RENDER COMPLETADOS ──
+    function renderCompletados(lista) {
+        const cont = document.getElementById('completadosContainer');
+        const completados = lista.filter(p => p.estado === 'completado').slice(0, 8);
+        if (!completados.length) { cont.innerHTML = '<div class="loading">Sin pedidos completados aún.</div>'; return; }
+        cont.innerHTML = completados.map(p => {
+            const hora = p.fechaHora?.toDate ? p.fechaHora.toDate().toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+            return `
+            <div class="race-item">
+                <div class="race-driver"><span class="race-dot completed"></span><span>${p.motorizadoNombre || 'Sin asignar'}</span></div>
+                <span>${p.cliente?.barrio || '—'}</span>
+                <span style="color:#f5b064;">$${(p.precioCobrado || 0).toFixed(2)}</span>
+                <span style="color:#9ab0c9;">${hora}</span>
+            </div>`;
+        }).join('');
+    }
+
+    // ── RENDER MOTORIZADOS ──
+    function renderMotorizados(lista) {
+        const container = document.getElementById('driversContainer');
+        if (lista.length === 0) { container.innerHTML = `<div class="loading">No hay motorizados en esta categoría.</div>`; return; }
+        container.innerHTML = lista.map(m => {
+            let cls, icon, texto;
+            if (m.estado === 'disponible')      { cls = 'online';  icon = '🟢'; texto = 'Disponible'; }
+            else if (m.estado === 'en carrera') { cls = 'busy';    icon = '🟡'; texto = 'En carrera'; }
+            else                                { cls = 'offline'; icon = '🔴'; texto = 'Desconectado'; }
+            const btnToggle = m.desactivado
+                ? `<button class="btn-toggle activar" data-id="${m.id}"><i class="fas fa-check-circle"></i> Activar</button>`
+                : `<button class="btn-toggle desactivar" data-id="${m.id}"><i class="fas fa-ban"></i> Desactivar</button>`;
+            return `
+            <div class="driver-pro-card ${m.desactivado ? 'desactivado' : ''}">
+                <div class="driver-pro-header">
+                    <div class="driver-pro-info">
+                        <div class="driver-pro-avatar"><i class="fas fa-user-circle"></i></div>
+                        <div class="driver-pro-name"><h4>${m.nombre}</h4>
+                            <a href="https://wa.me/58${m.telefono.replace(/^0/,'').replace(/\D/g,'')}" target="_blank"
+                                style="color:#25D366; font-size:0.8rem; text-decoration:none;">
+                                <i class="fab fa-whatsapp"></i> ${m.telefono}
+                            </a>
+                        </div>
+                    </div>
+                    <span class="status-pro ${cls}">${icon} ${texto}</span>
+                </div>
+                <div class="driver-pro-details">
+                    <div class="detail-item"><i class="fas fa-motorcycle"></i> ${m.vehiculo}</div>
+                    <div class="detail-item"><i class="fas fa-id-card"></i> ${m.cedula || 'Sin cédula'}</div>
+                    <div class="detail-item"><i class="fas fa-lock"></i> PIN: ${m.pin}</div>
+                    <div class="detail-item"><i class="fas fa-box"></i> ${m.entregas || 0} entregas</div>
+
+                </div>
+                <div class="driver-pro-footer">
+                    <div class="earnings"><small>Viajes</small><strong>${m.entregas || 0}</strong></div>
+                    ${btnToggle}
+                    <button class="btn-toggle" style="background:#1a3a4a40;border:1px solid #f5b06480;color:#f5d7a3;" data-reset="${m.id}" data-nombre="${m.nombre}" title="Resetear historial"><i class="fas fa-redo"></i></button>
+                    <button class="btn-toggle" style="background:#7b1f1f40;border:1px solid #c0392b80;color:#f0a0a0;" data-del="${m.id}" data-nombre="${m.nombre}"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`;
+        }).join('');
+
+        container.querySelectorAll('.btn-toggle[data-id]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const m = todosMotorizados.find(m => m.id === btn.dataset.id);
+                if (!m) return;
+                try { await updateDoc(doc(db, "motorizados", btn.dataset.id), { desactivado: !m.desactivado }); }
+                catch(e) { alert('❌ Error al actualizar.'); }
+            });
+        });
+
+        container.querySelectorAll('.btn-toggle[data-del]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('¿Eliminar a ' + btn.dataset.nombre + '? Esta acción no se puede deshacer.')) return;
+                try { await deleteDoc(doc(db, "motorizados", btn.dataset.del)); }
+                catch(e) { alert('❌ Error al eliminar.'); }
+            });
+        });
+
+        // Botón resetear historial
+        container.querySelectorAll('.btn-toggle[data-reset]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const nombre = btn.dataset.nombre;
+                if (!confirm(`¿Resetear el historial de viajes de ${nombre}? Esto pondrá sus viajes en 0. No se pueden recuperar.`)) return;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                try {
+                    // Resetear contador de entregas
+                    await updateDoc(doc(db, "motorizados", btn.dataset.reset), { entregas: 0 });
+                    // Borrar viajes completados de este motorizado
+                    const snap = await getDocs(query(
+                        collection(db, "viajes"),
+                        where("motorizadoId", "==", btn.dataset.reset),
+                        where("estado", "==", "completado")
+                    ));
+                    const borrar = snap.docs.map(d => deleteDoc(doc(db, "viajes", d.id)));
+                    await Promise.all(borrar);
+                    btn.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-redo"></i>'; }, 1500);
+                } catch(e) {
+                    alert('❌ Error al resetear.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-redo"></i>';
+                }
+            });
+        });
+    }
+
+    function renderStats(lista) {
+        document.getElementById('statTotal').textContent    = lista.length;
+        document.getElementById('statActivos').textContent  = lista.filter(m => m.estado === 'disponible' && !m.desactivado).length;
+        document.getElementById('statCarreras').textContent = lista.filter(m => m.estado === 'en carrera').length;
+
+    }
+
+    function renderPagos(lista) {
+        const container = document.getElementById('pagosContainer');
+        const conComision = lista.filter(m => (m.comisionAcumulada || 0) > 0);
+        if (conComision.length === 0) { container.innerHTML = `<div class="loading">Sin comisiones pendientes.</div>`; return; }
+        container.innerHTML = conComision.map(m => `
+            <div class="payment-item">
+                <div class="payment-info">
+                    <div class="payment-avatar"><i class="fas fa-user"></i></div>
+                    <div class="payment-details"><h4>${m.nombre}</h4><span>${m.entregas || 0} entregas · ${m.telefono}</span></div>
+                </div>
+                <div class="payment-amount">$${(m.comisionAcumulada || 0).toFixed(2)}</div>
+                <button class="btn-pay btn-pagar-comision" data-id="${m.id}" data-nombre="${m.nombre}" data-monto="${(m.comisionAcumulada || 0).toFixed(2)}" data-entregas="${m.entregas || 0}">
+                    <i class="fas fa-check"></i> Pagar
+                </button>
+            </div>`).join('');
+    }
+
+    function renderHistorialPagos(pagos) {
+        const cont = document.getElementById('historialPagosContainer');
+        if (!pagos.length) { cont.innerHTML = '<div class="loading">Sin pagos registrados aún.</div>'; return; }
+        cont.innerHTML = pagos.map(p => {
+            const fecha = p.fecha?.toDate ? p.fecha.toDate().toLocaleString('es-VE') : '--';
+            return `
+            <div class="pago-hist-item">
+                <div>
+                    <div class="pago-hist-nombre"><i class="fas fa-user" style="color:#f5b064; margin-right:6px;"></i>${p.motorizado}</div>
+                    <div class="pago-hist-fecha"><i class="far fa-calendar-alt" style="margin-right:4px;"></i>${fecha} · ${p.entregas} entregas</div>
+                </div>
+                <div class="pago-hist-monto"><i class="fas fa-coins" style="margin-right:6px;"></i>$${parseFloat(p.monto).toFixed(2)}</div>
+            </div>`;
+        }).join('');
+    }
+
+
+
+
+
+    function aplicarFiltros() {
+        const texto = document.getElementById('buscador').value.toLowerCase();
+        let filtrados = todosMotorizados;
+        if (tabActiva !== 'todos') filtrados = filtrados.filter(m => m.estado === tabActiva);
+        if (texto) filtrados = filtrados.filter(m => m.nombre.toLowerCase().includes(texto) || m.telefono.toLowerCase().includes(texto));
+        renderMotorizados(filtrados);
+    }
+
+    // ── RENDER ZONAS ──
+    function renderZonas(zonas) {
+        const container = document.getElementById('zonasContainer');
+        if (zonas.length === 0) { container.innerHTML = `<div class="loading">No hay zonas registradas. Agrega la primera.</div>`; return; }
+        container.innerHTML = zonas.map(z => `
+            <div class="zona-card">
+                <div class="zona-info">
+                    <h4><i class="fas fa-map-pin" style="color:#f5b064; margin-right:6px;"></i>${z.nombre}</h4>
+                    <span>zona de delivery</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div class="zona-precio">$${parseFloat(z.precio).toFixed(2)}</div>
+                    <button class="btn-zona-eliminar" style="background:#1a3a4a40;border:1px solid #f5b06480;color:#f5d7a3;" data-edit-id="${z.id}" data-edit-nombre="${z.nombre}" data-edit-precio="${z.precio}"><i class="fas fa-edit"></i></button>
+                    <button class="btn-zona-eliminar" data-id="${z.id}"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>`).join('');
+
+        // Listener editar zona
+        container.querySelectorAll('.btn-zona-eliminar[data-edit-id]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('zonaEditId').value          = btn.dataset.editId;
+                document.getElementById('zonaNombre').value          = btn.dataset.editNombre;
+                document.getElementById('zonaPrecio').value          = btn.dataset.editPrecio;
+                document.getElementById('modalZonaTitulo').innerHTML = '<i class="fas fa-edit"></i> Editar zona';
+                document.getElementById('modalZonaSub').textContent  = 'modifica el nombre o el precio';
+                modalZona.style.display = 'flex';
+            });
+        });
+
+        // Listener eliminar zona
+        container.querySelectorAll('.btn-zona-eliminar[data-id]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('¿Eliminar esta zona?')) return;
+                try { await deleteDoc(doc(db, "zonas", btn.dataset.id)); }
+                catch(e) { alert('❌ Error al eliminar.'); }
+            });
+        });
+    }
+    // ── FIREBASE: PEDIDOS EN TIEMPO REAL ──
+    onSnapshot(
+        collection(db, "carreras"),
+        snapshot => {
+            todosPedidos = snapshot.docs
+                .map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => {
+                    const ta = a.fechaHora?.toDate ? a.fechaHora.toDate() : new Date(0);
+                    const tb = b.fechaHora?.toDate ? b.fechaHora.toDate() : new Date(0);
+                    return tb - ta; // más reciente primero
+                });
+            renderPedidos(todosPedidos);
+            renderCompletados(todosPedidos);
+        },
+        error => console.error("Error carreras:", error)
+    );
+
+    onSnapshot(collection(db, "motorizados"), snapshot => {
+        todosMotorizados = snapshot.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .filter(m => m.tipo === "mototaxi"); // solo mototaxi, excluye docs sin tipo
+        renderStats(todosMotorizados);
+        aplicarFiltros();
+        actualizarSelectHistorial(todosMotorizados);
+    });
+
+    onSnapshot(collection(db, "zonas"), snapshot => {
+        const zonas = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        zonas.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        renderZonas(zonas);
+    });
+
+    // ── RENDER RESTAURANTES ──
+    function renderRestaurantes(lista) {
+        const container = document.getElementById('restaurantesContainer');
+        if (lista.length === 0) { container.innerHTML = `<div class="loading">No hay restaurantes. Agrega el primero.</div>`; return; }
+        container.innerHTML = lista.map(r => `
+            <div class="zona-card">
+                <div class="zona-info">
+                    <h4><span style="margin-right:6px;">${r.emoji || '🍽️'}</span>${r.nombre}</h4>
+                    <span>${r.telefono ? `<i class="fab fa-whatsapp" style="color:#25D366;"></i> ${r.telefono}` : 'Sin número registrado'}</span>
+                </div>
+                <button class="btn-zona-eliminar" data-id="${r.id}"><i class="fas fa-trash"></i></button>
+            </div>`).join('');
+        container.querySelectorAll('.btn-zona-eliminar').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('¿Eliminar este restaurante?')) return;
+                try { await deleteDoc(doc(db, "restaurantes", btn.dataset.id)); }
+                catch(e) { alert('❌ Error al eliminar.'); }
+            });
+        });
+    }
+
+    onSnapshot(collection(db, "restaurantes"), snapshot => {
+        const rests = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        rests.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        renderRestaurantes(rests);
+    });
+
+    // ── MODAL RESTAURANTE ──
+    const modalRest   = document.getElementById('modalRestaurante');
+    const guardarRest = document.getElementById('guardarRestaurante');
+
+    document.getElementById('openModalRestaurante').addEventListener('click', () => modalRest.style.display = 'flex');
+    document.getElementById('cancelarRestaurante').addEventListener('click', () => cerrarModalRest());
+    window.addEventListener('click', e => { if (e.target === modalRest) cerrarModalRest(); });
+
+    function cerrarModalRest() {
+        modalRest.style.display = 'none';
+        document.getElementById('restNombre').value   = '';
+        document.getElementById('restEmoji').value    = '';
+        document.getElementById('restTelefono').value = '';
+    }
+
+    guardarRest.addEventListener('click', async e => {
+        e.preventDefault();
+        const nombre   = document.getElementById('restNombre').value.trim();
+        const emoji    = document.getElementById('restEmoji').value.trim();
+        const telefono = document.getElementById('restTelefono').value.trim();
+        if (!nombre) { alert('Escribe el nombre del restaurante.'); return; }
+        guardarRest.disabled = true;
+        guardarRest.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Guardando...`;
+        try {
+            await addDoc(collection(db, "restaurantes"), { nombre, emoji: emoji || '🍽️', telefono: telefono || '' });
+            cerrarModalRest();
+        } catch(err) { alert('❌ Error al guardar.'); }
+        finally { guardarRest.disabled = false; guardarRest.innerHTML = `<i class="fas fa-save"></i> Guardar`; }
+    });
+
+
+
+    // ── PESTAÑAS MOTORIZADOS ──
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            tabActiva = btn.dataset.tab;
+            aplicarFiltros();
+        });
+    });
+
+    document.getElementById('buscador').addEventListener('input', aplicarFiltros);
+
+    // ── MODAL MOTORIZADO ──
+    const modalMoto  = document.getElementById('modalRegistro');
+    const guardarBtn = document.getElementById('guardarMotorizado');
+
+    document.getElementById('openModalBtn').addEventListener('click', () => modalMoto.style.display = 'flex');
+    document.getElementById('cancelarModal').addEventListener('click', () => cerrarModalMoto());
+    window.addEventListener('click', e => { if (e.target === modalMoto) cerrarModalMoto(); });
+
+    function cerrarModalMoto() {
+        modalMoto.style.display = 'none';
+        ['regNombre','regCedula','regTelefono','regVehiculo','regPin'].forEach(id => document.getElementById(id).value = '');
+    }
+
+    guardarBtn.addEventListener('click', async e => {
+        e.preventDefault();
+        const nombre   = document.getElementById('regNombre').value.trim();
+        const cedula   = document.getElementById('regCedula').value.trim();
+        const telefono = document.getElementById('regTelefono').value.trim();
+        const vehiculo = document.getElementById('regVehiculo').value.trim();
+        const pin      = document.getElementById('regPin').value.trim();
+
+        if (!nombre || !cedula || !telefono || !vehiculo || !pin || pin.length !== 4) {
+            alert('Completa todos los campos. El PIN debe ser de 4 dígitos.');
+            return;
+        }
+
+        guardarBtn.disabled = true;
+        guardarBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verificando...`;
+
+        try {
+            // Validar teléfono duplicado solo entre mototaxi
+            const snapTel = await getDocs(query(collection(db, "motorizados"), where("telefono", "==", telefono), where("tipo", "==", "mototaxi")));
+            if (!snapTel.empty) {
+                alert(`❌ Ya existe un motorizado con el teléfono ${telefono}.`);
+                return;
+            }
+            // Validar cédula duplicada solo entre mototaxi
+            const snapCed = await getDocs(query(collection(db, "motorizados"), where("cedula", "==", cedula), where("tipo", "==", "mototaxi")));
+            if (!snapCed.empty) {
+                alert(`❌ Ya existe un motorizado con la cédula ${cedula}.`);
+                return;
+            }
+
+            guardarBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Guardando...`;
+            await addDoc(collection(db, "motorizados"), {
+                nombre, cedula, telefono, vehiculo, pin,
+                tipo: 'mototaxi',
+                estado: 'desconectado', desactivado: false,
+                entregas: 0, comisionAcumulada: 0.0
+            });
+            cerrarModalMoto();
+        } catch(err) { alert('❌ Error al guardar.'); }
+        finally { guardarBtn.disabled = false; guardarBtn.innerHTML = `<i class="fas fa-save"></i> Guardar`; }
+    });
+
+    // ── MODAL ZONA ──
+    const modalZona   = document.getElementById('modalZona');
+    const guardarZona = document.getElementById('guardarZona');
+
+    document.getElementById('openModalZona').addEventListener('click', () => modalZona.style.display = 'flex');
+    document.getElementById('cancelarZona').addEventListener('click', () => cerrarModalZona());
+    window.addEventListener('click', e => { if (e.target === modalZona) cerrarModalZona(); });
+
+    function cerrarModalZona() {
+        modalZona.style.display = 'none';
+        document.getElementById('zonaNombre').value          = '';
+        document.getElementById('zonaPrecio').value          = '';
+        document.getElementById('zonaEditId').value          = '';
+        document.getElementById('modalZonaTitulo').innerHTML = '<i class="fas fa-map-marker-alt"></i> Nueva zona';
+        document.getElementById('modalZonaSub').textContent  = 'agrega una zona con su precio de delivery';
+    }
+
+    // ── CONFIGURACIÓN: COMISIÓN ──
+    async function cargarComision() {
+        try {
+            const snap = await getDocs(collection(db, "configuracion"));
+            if (!snap.empty) {
+                const cfg = snap.docs[0].data();
+                const val = cfg.comision || 10;
+                document.getElementById('inputComision').value = val;
+                document.getElementById('comisionActualValor').textContent = val + '%';
+                actualizarPreviewComision(val);
+            }
+        } catch(e) {}
+    }
+
+    function actualizarPreviewComision(val) {
+        const ejemplo = 8.00;
+        const comision = (ejemplo * val / 100).toFixed(2);
+        document.getElementById('comisionPreview').textContent = `= $${comision} por cada $${ejemplo.toFixed(2)}`;
+    }
+
+    document.getElementById('inputComision').addEventListener('input', function() {
+        actualizarPreviewComision(parseFloat(this.value) || 0);
+    });
+
+    document.getElementById('btnGuardarComision').addEventListener('click', async () => {
+        const val = parseFloat(document.getElementById('inputComision').value);
+        if (!val || val < 1 || val > 50) { alert('Ingresa un porcentaje válido entre 1 y 50.'); return; }
+        const btn = document.getElementById('btnGuardarComision');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        try {
+            // Buscar si ya existe doc de configuración
+            const snap = await getDocs(collection(db, "configuracion"));
+            if (snap.empty) {
+                await addDoc(collection(db, "configuracion"), { comision: val });
+            } else {
+                await updateDoc(doc(db, "configuracion", snap.docs[0].id), { comision: val });
+            }
+            document.getElementById('comisionActualValor').textContent = val + '%';
+            btn.innerHTML = '<i class="fas fa-check"></i> Guardado';
+            setTimeout(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Guardar'; }, 2000);
+        } catch(e) {
+            alert('❌ Error al guardar.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar';
+        }
+    });
+
+    // ── HISTORIAL POR MOTORIZADO ──
+    function actualizarSelectHistorial(lista) {
+        const sel = document.getElementById('filtroMotoHistorial');
+        const val = sel.value;
+        sel.innerHTML = '<option value="">— Selecciona un motorizado —</option>' +
+            lista.map(m => `<option value="${m.id}">${m.nombre} · ${m.entregas || 0} viajes</option>`).join('');
+        if (val) sel.value = val;
+    }
+
+    async function cargarHistorialMoto(motoId) {
+        const cont = document.getElementById('historialMotoContainer');
+        if (!motoId) {
+            cont.innerHTML = '<div class="loading"><i class="fas fa-inbox"></i> Selecciona un motorizado</div>';
+            return;
+        }
+        cont.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
+        try {
+            const snap = await getDocs(query(
+                collection(db, "viajes"),
+                where("motorizadoId", "==", motoId),
+                where("estado", "==", "completado")
+            ));
+            const viajes = snap.docs
+                .map(d => ({ id: d.id, ...d.data() }))
+                .sort((a, b) => {
+                    const ta = a.fechaHora?.toDate ? a.fechaHora.toDate() : new Date(0);
+                    const tb = b.fechaHora?.toDate ? b.fechaHora.toDate() : new Date(0);
+                    return tb - ta;
+                });
+
+            if (!viajes.length) {
+                cont.innerHTML = '<div class="loading"><i class="fas fa-check-circle"></i> Sin viajes registrados aún</div>';
+                return;
+            }
+
+            const moto = todosMotorizados.find(m => m.id === motoId);
+
+            // Extraer precio del destino "Zona | $X.XX"
+            const extraerPrecio = (destino) => {
+                const match = (destino || '').match(/\$([0-9.]+)/);
+                return match ? parseFloat(match[1]) : 0;
+            };
+
+            // Total del día
+            const hoy = new Date().toDateString();
+            const viajesHoy = viajes.filter(v => v.fechaHora?.toDate && v.fechaHora.toDate().toDateString() === hoy);
+            const totalHoy  = viajesHoy.reduce((a, v) => a + extraerPrecio(v.cliente?.destino), 0);
+            const totalTodo = viajes.reduce((a, v) => a + extraerPrecio(v.cliente?.destino), 0);
+
+            cont.innerHTML = `
+                <div style="margin-bottom:1rem; padding:1rem 1.4rem; background:#1b2938; border-radius:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.8rem;">
+                    <span style="color:#f5d7a3; font-weight:600; font-size:1.05rem;"><i class="fas fa-motorcycle" style="color:#f5b064; margin-right:8px;"></i>${moto?.nombre || '—'}</span>
+                    <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                        <span style="color:#8de0a0; font-size:0.9rem;"><i class="fas fa-route" style="margin-right:6px;"></i>${viajes.length} viaje(s)</span>
+                        <span style="color:#f5b064; font-weight:700; font-size:1rem;">Hoy: $${totalHoy.toFixed(2)}</span>
+                        <span style="color:#fadcb0; font-size:0.85rem;">Total: $${totalTodo.toFixed(2)}</span>
+                    </div>
+                </div>
+                ${viajes.map(v => {
+                    const fecha  = v.fechaHora?.toDate ? v.fechaHora.toDate() : null;
+                    const hora   = fecha ? fecha.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+                    const dia    = fecha ? fecha.toLocaleDateString('es-VE', {day:'2-digit', month:'short'}) : '--';
+                    const precio = extraerPrecio(v.cliente?.destino);
+                    return `
+                    <div style="background:#1b2938; border-radius:16px; padding:0.9rem 1.2rem; margin-bottom:0.6rem; border-left:3px solid #f5b06460;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                            <span style="color:#f0deb0; font-weight:600;">${v.cliente?.nombre || '—'}</span>
+                            <span style="color:#f5b064; font-weight:700; font-size:1.05rem;">$${precio.toFixed(2)}</span>
+                        </div>
+                        <div style="font-size:0.82rem; color:#9ab0c9; margin-bottom:0.2rem;">
+                            <i class="fas fa-map-marker-alt" style="color:#f5b064; margin-right:4px;"></i>${v.cliente?.origen || '—'}
+                        </div>
+                        <div style="font-size:0.82rem; color:#9ab0c9; margin-bottom:0.3rem;">
+                            <i class="fas fa-flag-checkered" style="margin-right:4px;"></i>${v.cliente?.destino || '—'}
+                        </div>
+                        <div style="font-size:0.75rem; color:#6b7f94;">${dia} · ${hora}</div>
+                    </div>`;
+                }).join('')}`;
+        } catch(e) {
+            cont.innerHTML = '<div class="loading">❌ Error al cargar el historial</div>';
+        }
+    }
+
+    document.getElementById('filtroMotoHistorial').addEventListener('change', e => {
+        cargarHistorialMoto(e.target.value);
+    });
+
+    // ══════════ CLIENTES ══════════
+
+    let todosClientes = [];
+
+    function renderClientes(lista) {
+        const cont = document.getElementById('clientesContainer');
+        document.getElementById('statTotalClientes').textContent = lista.length;
+        document.getElementById('statTotalViajesClientes').textContent = lista.reduce((a, cl) => a + (cl.totalViajes || 0), 0);
+
+        if (!lista.length) {
+            cont.innerHTML = '<div class="loading"><i class="fas fa-inbox"></i><br>Sin clientes registrados aún</div>';
+            return;
+        }
+
+        cont.innerHTML = lista.map(cl => {
+            const ultimo = cl.ultimoViaje?.toDate
+                ? cl.ultimoViaje.toDate().toLocaleDateString('es-VE', {day:'2-digit', month:'short', year:'numeric'})
+                : '—';
+            const registro = cl.fechaRegistro?.toDate
+                ? cl.fechaRegistro.toDate().toLocaleDateString('es-VE', {day:'2-digit', month:'short', year:'numeric'})
+                : '—';
+            return `
+            <div class="payment-item">
+                <div class="payment-info">
+                    <div class="payment-avatar"><i class="fas fa-user"></i></div>
+                    <div class="payment-details">
+                        <h4>${cl.nombre}</h4>
+                        <span>
+                            <a href="https://wa.me/58${cl.telefono.replace(/^0/,'').replace(/\D/g,'')}" target="_blank"
+                                style="color:#25D366; text-decoration:none;">
+                                <i class="fab fa-whatsapp"></i> ${cl.telefono}
+                            </a>
+                            ${cl.email ? `· <i class="fas fa-envelope" style="color:#9ab0c9;margin:0 3px;"></i><span style="color:#9ab0c9;">${cl.email}</span>` : ''}
+                            · desde ${registro}
+                        </span>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:1.1rem; font-weight:700; color:#f5b064;">
+                        <i class="fas fa-route" style="margin-right:4px;"></i>${cl.totalViajes || 0} viaje(s)
+                    </div>
+                    <div style="font-size:0.78rem; color:#6b7f94;">último: ${ultimo}</div>
+                    <button onclick="borrarCliente('${cl.id}', '${cl.nombre}')" style="margin-top:0.5rem; background:transparent; border:1px solid #c0392b40; color:#e57373; padding:0.3rem 0.8rem; border-radius:20px; font-size:0.72rem; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='#c0392b20'" onmouseout="this.style.background='transparent'">
+                        <i class="fas fa-trash-alt"></i> Borrar
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    window.borrarCliente = async function(id, nombre) {
+        if (!confirm('¿Borrar al cliente ' + nombre + '? Esta acción no se puede deshacer.')) return;
+        try {
+            await deleteDoc(doc(db, 'clientesMototaxi', id));
+        } catch(e) {
+            alert('Error al borrar: ' + e.message);
+        }
+    }
+
+    function filtrarClientes() {
+        const texto = document.getElementById('buscadorClientes').value.toLowerCase();
+        const filtrados = texto
+            ? todosClientes.filter(cl =>
+                cl.nombre.toLowerCase().includes(texto) ||
+                cl.telefono.toLowerCase().includes(texto))
+            : todosClientes;
+        renderClientes(filtrados);
+    }
+
+    document.getElementById('buscadorClientes').addEventListener('input', filtrarClientes);
+
+    onSnapshot(collection(db, "clientesMototaxi"), snapshot => {
+        todosClientes = snapshot.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => (b.totalViajes || 0) - (a.totalViajes || 0));
+        filtrarClientes();
+    });
+
+    cargarComision();
+
+    // ══════════ AUTO-CANCELAR VIAJES/CARRERAS VIEJOS ══════════
+    async function cancelarViejosAbiertos() {
+        const CINCO_MIN = 5 * 60 * 1000;
+        const ahora = Date.now();
+
+        try {
+            // Revisar viajes abiertos
+            const snapViajes = await getDocs(
+                query(collection(db, "viajes"), where("estado", "==", "abierto"))
+            );
+            for (const d of snapViajes.docs) {
+                const data = d.data();
+                const t = data.fechaHora?.toDate ? data.fechaHora.toDate().getTime() : ahora;
+                if ((ahora - t) >= CINCO_MIN) {
+                    await updateDoc(doc(db, "viajes", d.id), { estado: "cancelado" });
+                    console.log("⏱️ Viaje cancelado por tiempo:", d.id);
+                }
+            }
+
+            // Revisar carreras abiertas
+            const snapCarreras = await getDocs(
+                query(collection(db, "carreras"), where("estado", "==", "abierto"))
+            );
+            for (const d of snapCarreras.docs) {
+                const data = d.data();
+                const t = data.fechaHora?.toDate ? data.fechaHora.toDate().getTime() : ahora;
+                if ((ahora - t) >= CINCO_MIN) {
+                    await updateDoc(doc(db, "carreras", d.id), { estado: "cancelado" });
+                    console.log("⏱️ Carrera cancelada por tiempo:", d.id);
+                }
+            }
+        } catch(e) {
+            console.error("Error al cancelar viejos:", e);
+        }
+    }
+
+    // Correr al cargar y luego cada minuto
+    cancelarViejosAbiertos();
+    setInterval(cancelarViejosAbiertos, 60 * 1000);
+
+    // ══════════ VIAJES (MOTO TAXI) ══════════
+
+    let todosViajes = [];
+    let filtroViaje = 'todos';
+
+    // Filtros viajes
+    document.querySelectorAll('[data-filtro-viaje]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-filtro-viaje]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filtroViaje = btn.dataset.filtroViaje;
+            renderViajes(todosViajes);
+        });
+    });
+
+    function renderViajes(lista) {
+        const container = document.getElementById('viajesContainer');
+        const activos = lista.filter(v => v.estado === 'abierto' || v.estado === 'asignada');
+        const filtrados = filtroViaje === 'todos' ? activos : activos.filter(v => v.estado === filtroViaje);
+
+        // Stats
+        document.getElementById('statViajesPendientes').textContent = activos.filter(v => v.estado === 'abierto').length;
+        document.getElementById('statViajesAsignados').textContent  = activos.filter(v => v.estado === 'asignada').length;
+        const hoy = new Date().toDateString();
+        document.getElementById('statViajesHoy').textContent = lista.filter(v => v.estado === 'completado' && v.fechaHora?.toDate && v.fechaHora.toDate().toDateString() === hoy).length;
+
+        // Badge nav
+        const badge = document.getElementById('badgeViajes');
+        const sinAsignar = activos.filter(v => v.estado === 'abierto').length;
+        badge.textContent = sinAsignar;
+        badge.style.display = sinAsignar > 0 ? 'inline' : 'none';
+
+        if (filtrados.length === 0) {
+            container.innerHTML = '<div class="loading"><i class="fas fa-inbox"></i><br>Sin viajes en esta categoría</div>';
+            return;
+        }
+
+        const disponibles = todosMotorizados.filter(m => m.estado === 'disponible' && !m.desactivado);
+        const opcionesMotos = disponibles.length
+            ? disponibles.map(m => `<option value="${m.id}">${m.nombre}</option>`).join('')
+            : '<option value="" disabled>Sin motorizados disponibles</option>';
+
+        container.innerHTML = filtrados.map(v => {
+            const hora = v.fechaHora?.toDate ? v.fechaHora.toDate().toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+            const esAbierto = v.estado === 'abierto';
+            const gpsBtn = v.cliente?.gps && v.cliente.gps !== 'No compartida'
+                ? `<a href="${v.cliente.gps}" target="_blank" style="color:#f5b064; font-size:0.8rem;"><i class="fas fa-map-marker-alt"></i> GPS</a>` : '';
+
+            return `
+            <div class="viaje-card ${v.estado}" data-vid="${v.id}">
+                <div class="pedido-header">
+                    <div>
+                        <div class="pedido-restaurante"><i class="fas fa-user" style="color:#f5b064; margin-right:6px;"></i>${v.cliente?.nombre || '—'}</div>
+                        <div class="pedido-hora"><i class="far fa-clock" style="margin-right:4px;"></i>${hora}</div>
+                    </div>
+                    <span class="badge-estado badge-${v.estado}">${esAbierto ? '⏳ Sin asignar' : '🛵 En camino'}</span>
+                </div>
+                <div class="pedido-datos">
+                    <div class="pedido-dato"><i class="fas fa-phone-alt"></i> ${v.cliente?.telefono || '—'}</div>
+                    <div class="pedido-dato"><i class="fas fa-map-marker-alt"></i> ${(v.cliente?.origen || '—').substring(0,30)}${(v.cliente?.origen||'').length > 30 ? '…' : ''}</div>
+                    <div class="pedido-dato" style="grid-column:1/-1;"><i class="fas fa-flag-checkered"></i> <strong>Destino:</strong> ${v.cliente?.destino || '—'}</div>
+                </div>
+                ${v.motorizadoNombre ? `<div style="font-size:0.85rem; color:#8de0a0; margin-bottom:0.5rem;"><i class="fas fa-motorcycle"></i> Asignado: <strong>${v.motorizadoNombre}</strong></div>` : ''}
+                <div class="pedido-actions">
+                    ${gpsBtn}
+                    ${esAbierto ? `
+                        <select class="select-moto" id="motoViaje-${v.id}">
+                            <option value="" disabled selected>Asignar motorizado...</option>
+                            ${opcionesMotos}
+                        </select>
+                        <button class="btn-asignar btn-asignar-viaje" data-vid="${v.id}">
+                            <i class="fas fa-motorcycle"></i> Asignar
+                        </button>
+                    ` : `
+                        <span style="font-size:0.82rem; color:#8de0a0;"><i class="fas fa-motorcycle"></i> En camino · el motorizado confirma al llegar</span>
+                    `}
+                    <button class="btn-cancelar-pedido btn-cancelar-viaje" data-vid="${v.id}" data-mid="${v.motorizadoId || ''}"><i class="fas fa-times"></i></button>
+                </div>
+            </div>`;
+        }).join('');
+
+        // Asignar viaje
+        container.querySelectorAll('.btn-asignar-viaje').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const vid    = btn.dataset.vid;
+                const motoId = document.getElementById('motoViaje-' + vid)?.value;
+                if (!motoId) { alert('Selecciona un motorizado.'); return; }
+                const moto = todosMotorizados.find(m => m.id === motoId);
+                btn.disabled = true;
+                try {
+                    await updateDoc(doc(db, 'viajes', vid), {
+                        estado: 'asignada',
+                        motorizadoId:     motoId,
+                        motorizadoNombre: moto?.nombre || ''
+                    });
+                    await updateDoc(doc(db, 'motorizados', motoId), { estado: 'en carrera' });
+                } catch(e) { alert('Error al asignar.'); btn.disabled = false; }
+            });
+        });
+
+        // Cancelar viaje
+        container.querySelectorAll('.btn-cancelar-viaje').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('¿Cancelar este viaje?')) return;
+                try {
+                    await updateDoc(doc(db, 'viajes', btn.dataset.vid), { estado: 'cancelado' });
+                    if (btn.dataset.mid) await updateDoc(doc(db, 'motorizados', btn.dataset.mid), { estado: 'disponible' });
+                } catch(e) { alert('Error al cancelar.'); }
+            });
+        });
+    }
+
+    function renderViajesCompletados(lista) {
+        const cont = document.getElementById('viajesCompletadosContainer');
+        const completados = lista.filter(v => v.estado === 'completado').slice(0, 8);
+        if (!completados.length) { cont.innerHTML = '<div class="loading">Sin viajes completados aún.</div>'; return; }
+        cont.innerHTML = completados.map(v => {
+            const hora = v.fechaHora?.toDate ? v.fechaHora.toDate().toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+            return `
+            <div class="race-item">
+                <div class="race-driver"><span class="race-dot completed"></span><span>${v.motorizadoNombre || 'Sin asignar'}</span></div>
+                <span style="font-size:0.82rem; color:#9ab0c9;">${(v.cliente?.origen||'').substring(0,20)} → ${(v.cliente?.destino||'').substring(0,20)}</span>
+                <span style="color:#9ab0c9;">${hora}</span>
+            </div>`;
+        }).join('');
+    }
+
+    // Listener viajes en tiempo real
+    onSnapshot(collection(db, "viajes"), snapshot => {
+        todosViajes = snapshot.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => {
+                const ta = a.fechaHora?.toDate ? a.fechaHora.toDate() : new Date(0);
+                const tb = b.fechaHora?.toDate ? b.fechaHora.toDate() : new Date(0);
+                return tb - ta;
+            });
+        renderViajes(todosViajes);
+        renderViajesCompletados(todosViajes);
+    });
+
+    guardarZona.addEventListener('click', async e => {
+        e.preventDefault();
+        const nombre  = document.getElementById('zonaNombre').value.trim();
+        const precio  = parseFloat(document.getElementById('zonaPrecio').value);
+        const editId  = document.getElementById('zonaEditId').value.trim();
+        if (!nombre || isNaN(precio) || precio < 0) { alert('Escribe el nombre y el precio de la zona.'); return; }
+        guardarZona.disabled = true;
+        guardarZona.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Guardando...`;
+        try {
+            if (editId) {
+                await updateDoc(doc(db, "zonas", editId), { nombre, precio });
+            } else {
+                await addDoc(collection(db, "zonas"), { nombre, precio });
+            }
+            cerrarModalZona();
+        } catch(err) { alert('❌ Error al guardar.'); }
+        finally { guardarZona.disabled = false; guardarZona.innerHTML = `<i class="fas fa-save"></i> Guardar`; }
+    });
+</script>
+</body>
+</html>

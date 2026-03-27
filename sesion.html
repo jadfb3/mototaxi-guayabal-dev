@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>Motorizado · Moto Taxi Guayabal</title>
+    <meta name="theme-color" content="#f5b064">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Motorizado">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
+        body {
+            background: #0a0f16;
+            background: radial-gradient(circle at 30% 10%, #1e2a38, #0b1017);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            color: #eef2f5;
+        }
+
+        .card {
+            background: rgba(18, 25, 35, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(245, 176, 100, 0.25);
+            border-radius: 40px;
+            padding: 2rem 1.8rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 25px 45px -15px black;
+        }
+
+        /* ── LOGIN ── */
+        .icono-central { font-size: 4rem; text-align: center; margin-bottom: 0.5rem; filter: drop-shadow(0 0 10px #f5b06480); }
+        h2 { font-size: 2rem; font-weight: 600; text-align: center; color: #fadcb0; margin-bottom: 0.3rem; }
+        .sub { text-align: center; color: #b9c8dd; margin-bottom: 2rem; font-size: 0.95rem; }
+
+        label { display: block; margin-bottom: 0.4rem; font-weight: 500; color: #f5d7a3; font-size: 0.95rem; }
+        input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            margin-bottom: 1.3rem;
+            border-radius: 30px;
+            border: 1px solid #4f5f7050;
+            background: #1b2938;
+            color: white;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        input:focus { outline: none; border-color: #f5b064; background: #1f3142; }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(145deg, #f5b064, #d68f44);
+            border: none;
+            color: #0d1a24;
+            font-weight: 700;
+            font-size: 1.3rem;
+            padding: 1.2rem;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 0.5rem 0 1rem;
+            cursor: pointer;
+            box-shadow: 0 12px 25px -8px #b56f2e;
+            transition: 0.1s;
+        }
+        .btn-primary:active { transform: scale(0.97); }
+        .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+        .error-box {
+            background: #3b1616;
+            border: 1px solid #c0392b60;
+            border-radius: 20px;
+            padding: 0.8rem 1.2rem;
+            color: #f0a0a0;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .divider { display: flex; align-items: center; gap: 10px; color: #b38f5f; margin: 1rem 0; }
+        .divider-line { height: 1px; background: #4d6278; flex: 1; }
+
+        /* ── PANEL ── */
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        .avatar-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #1b2938;
+            border: 1px solid #f5b064;
+            border-radius: 60px;
+            padding: 0.7rem 1.3rem;
+        }
+        .avatar-box i { font-size: 1.8rem; color: #f5b064; }
+        .avatar-nombre { font-size: 1rem; font-weight: 600; color: #f0deb0; }
+        .avatar-vehiculo { font-size: 0.78rem; color: #9ab0c9; }
+        .date-badge { background: #1f3142; border: 1px solid #f5b06440; border-radius: 40px; padding: 0.5rem 1.2rem; font-size: 0.85rem; color: #f5d7a3; }
+
+        /* Estado */
+        .estado-bar { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .btn-estado {
+            flex: 1;
+            min-width: 100px;
+            padding: 0.7rem 0.5rem;
+            border-radius: 30px;
+            border: 1px solid #4f637b;
+            background: transparent;
+            color: #9ab0c9;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: default;
+            pointer-events: none;
+            transition: 0.2s;
+        }
+        .btn-estado[data-estado="disponible"].activo  { background: #1a4228; border-color: #2ecc71; color: #8de0a0; }
+        .btn-estado[data-estado="en carrera"].activo  { background: #3d2a0a; border-color: #f39c12; color: #facc8c; }
+        .btn-estado[data-estado="desconectado"].activo{ background: #3a1818; border-color: #c0392b; color: #f0a0a0; }
+        .btn-estado:hover { border-color: #f5b064; }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: #1b2938; border-radius: 30px; padding: 1.2rem; text-align: center; border: 1px solid #f5b06430; }
+        .stat-num { font-size: 2rem; font-weight: 700; color: #fadcb0; }
+        .stat-lbl { font-size: 0.78rem; color: #9ab0c9; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Resumen día */
+        .resumen-dia { background: #1b2938; border-radius: 30px; padding: 1rem 1.3rem; margin-bottom: 1.5rem; border: 1px solid #f5b06420; }
+        .resumen-row { display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0; font-size: 0.9rem; color: #b9c8dd; }
+        .resumen-row.sep { border-top: 1px solid #273b4b; margin-top: 0.5rem; padding-top: 0.7rem; color: #f5d7a3; font-weight: 600; }
+        .resumen-row.comision { color: #8de0a0; }
+
+        /* Últimas carreras */
+        .section-label { font-size: 0.85rem; color: #9ab0c9; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem; display: flex; justify-content: space-between; }
+        .carrera-item {
+            background: #1b2938;
+            border-left: 4px solid #f5b064;
+            border-radius: 0 20px 20px 0;
+            padding: 0.9rem 1.1rem;
+            margin-bottom: 0.6rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .carrera-nombre { font-size: 0.95rem; color: #f0deb0; font-weight: 500; }
+        .carrera-sub { font-size: 0.78rem; color: #9ab0c9; margin-top: 2px; }
+        .carrera-monto { font-size: 1.1rem; font-weight: 700; color: #f5b064; white-space: nowrap; }
+
+        /* Pedidos pendientes asignados */
+        .pedido-pendiente {
+            background: #1f3520;
+            border: 1px solid #2ecc7160;
+            border-radius: 24px;
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+        .pedido-pendiente h4 { color: #8de0a0; font-size: 1rem; margin-bottom: 0.5rem; }
+        .pedido-row { font-size: 0.88rem; color: #b9c8dd; margin-bottom: 0.3rem; }
+        .pedido-row i { color: #f5b064; margin-right: 6px; width: 14px; }
+        .btn-gps-pedido {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #25D36620;
+            border: 1px solid #25D36660;
+            color: #8de0a0;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: 0.5rem;
+        }
+
+        .empty-state { text-align: center; color: #6b7f94; padding: 1.5rem; font-size: 0.9rem; }
+
+        .btn-entregado {
+            width: 100%;
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 1rem;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 1rem;
+            cursor: pointer;
+            box-shadow: 0 8px 20px -8px #27ae60;
+            transition: 0.1s;
+        }
+        .btn-entregado:active { transform: scale(0.97); }
+        .btn-entregado:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-logout {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #f5b06460;
+            color: #f5d7a3;
+            padding: 0.9rem;
+            border-radius: 60px;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        .btn-logout:hover { background: #f5b06415; }
+
+        /* CARRERAS DISPONIBLES */
+        .carrera-disponible {
+            background: linear-gradient(145deg, #1a3525, #162b1e);
+            border: 1px solid #2ecc7160;
+            border-radius: 24px;
+            padding: 1.2rem;
+            margin-bottom: 0.8rem;
+            animation: pulseCard 2s ease-in-out infinite;
+        }
+        @keyframes pulseCard {
+            0%, 100% { border-color: #2ecc7160; }
+            50% { border-color: #2ecc71cc; box-shadow: 0 0 12px #2ecc7130; }
+        }
+        .carrera-disponible h4 { color: #8de0a0; font-size: 1rem; margin-bottom: 0.6rem; }
+        .btn-aceptar-carrera {
+            width: 100%;
+            background: linear-gradient(145deg, #2ecc71, #27ae60);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 0.9rem;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 0.8rem;
+            cursor: pointer;
+            box-shadow: 0 6px 16px -6px #27ae60;
+            transition: 0.1s;
+        }
+        .btn-aceptar-carrera:active { transform: scale(0.97); }
+        .btn-aceptar-carrera:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-cancelar {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #c0392b80;
+            color: #f0a0a0;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 0.8rem;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 0.6rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-cancelar:hover { background: #c0392b20; border-color: #c0392b; }
+        .btn-cancelar:active { transform: scale(0.97); }
+        .btn-cancelar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 380px) { .card { padding: 1.5rem 1rem; } h2 { font-size: 1.7rem; } }
+    </style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div class="card" id="loginCard">
+    <div class="icono-central">🛵</div>
+    <h2>moto taxi guayabal</h2>
+    <div class="sub">ingresa con tu teléfono y PIN</div>
+
+    <div class="error-box" id="errorBox">
+        <i class="fas fa-exclamation-circle"></i> <span id="errorTxt"></span>
+    </div>
+
+    <label><i class="fas fa-phone-alt" style="color:#f5b064; margin-right:6px;"></i> Teléfono</label>
+    <input type="tel" id="loginTel" placeholder="0412 1234567" autocomplete="tel" inputmode="tel" x-inputmode="tel">
+
+    <label><i class="fas fa-lock" style="color:#f5b064; margin-right:6px;"></i> PIN</label>
+    <input type="password" id="loginPin" placeholder="••••" maxlength="4" inputmode="numeric" x-inputmode="numeric" autocomplete="one-time-code">
+
+    <button class="btn-primary" id="btnLogin" >
+        <i class="fas fa-sign-in-alt"></i> Ingresar
+    </button>
+
+    <div class="divider">
+        <span class="divider-line"></span>
+        <i class="fas fa-motorcycle"></i>
+        <span class="divider-line"></span>
+    </div>
+    <div style="text-align:center; font-size:0.78rem; color:#6b7f94;">
+        <i class="fas fa-info-circle"></i> Tu usuario es creado por el administrador
+    </div>
+</div>
+
+<!-- ══════════ PANEL DEL MOTORIZADO ══════════ -->
+<div class="card hidden" id="panelCard">
+
+    <div class="panel-header">
+        <div class="avatar-box">
+            <i class="fas fa-user-circle"></i>
+            <div>
+                <div class="avatar-nombre" id="panelNombre">—</div>
+                <div class="avatar-vehiculo" id="panelVehiculo">—</div>
+            </div>
+        </div>
+        <div class="date-badge" id="panelFecha"><i class="far fa-calendar-alt"></i> ...</div>
+    </div>
+
+    <!-- Carreras disponibles (solo visibles si está disponible) -->
+    <div id="seccionCarrerasDisponibles" style="display:none; margin-bottom:1.2rem;">
+        <div class="section-label">
+            <span><i class="fas fa-broadcast-tower" style="color:#2ecc71;"></i> Viajes y carreras disponibles</span>
+            <span id="labelCarrerasDisp" style="color:#2ecc71;"></span>
+        </div>
+        <div id="listaCarrerasDisponibles"></div>
+    </div>
+
+    <!-- Selector de estado -->
+    <div class="estado-bar">
+        <button class="btn-estado" data-estado="disponible">🟢 Disponible</button>
+        <button class="btn-estado" data-estado="en carrera">🟡 En carrera</button>
+    </div>
+
+    <!-- Aviso de desconexión por central -->
+    <div id="avisoCentral" style="display:none; background:#3a1818; border:1px solid #c0392b80; border-radius:20px; padding:0.8rem 1.2rem; margin-bottom:1.2rem; text-align:center; color:#f0a0a0; font-size:0.9rem;">
+        <i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i> La central te ha desconectado
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid" style="grid-template-columns:1fr;">
+        <div class="stat-card">
+            <div class="stat-num" id="statEntregas">0</div>
+            <div class="stat-lbl">Entregas totales</div>
+        </div>
+
+    </div>
+
+    <!-- Resumen del día -->
+    <div class="resumen-dia">
+        <div class="resumen-row"><span><i class="fas fa-box" style="color:#f5b064; margin-right:6px;"></i> Entregas hoy</span><span id="resEntregas">0</span></div>
+
+
+    </div>
+
+    <!-- Pedidos asignados -->
+    <div class="section-label">
+        <span><i class="fas fa-bell"></i> Servicios asignados</span>
+        <span id="labelPendientes" style="color:#f5b064;"></span>
+    </div>
+    <div id="pedidosPendientes">
+        <div class="empty-state"><i class="fas fa-check-circle"></i><br>Sin pedidos asignados</div>
+    </div>
+
+    <!-- Historial -->
+    <div class="section-label" style="margin-top:1.2rem;">
+        <span><i class="fas fa-history"></i> Historial</span>
+        <span id="labelHistorial" style="color:#9ab0c9;"></span>
+    </div>
+    <div id="historialCarreras">
+        <div class="empty-state"><i class="fas fa-box-open"></i><br>Sin historial aún</div>
+    </div>
+
+    <button class="btn-logout" id="btnLogout">
+        <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+    </button>
+</div>
+
+<script type="module">
+    // ── Beep urgente estilo caja registradora ──
+    let alarmaInterval = null;
+    let alarmaCtx = null;
+
+    // Audio MP3 principal
+    let alarmaAudio = null;
+
+    function playNotificationSound() {
+        // Intentar MP3 primero
+        try {
+            if (alarmaAudio) { alarmaAudio.pause(); alarmaAudio.currentTime = 0; }
+            alarmaAudio = new Audio('https://mototaxi-guayabal.vercel.app/alarma.mp3');
+            alarmaAudio.loop = true;
+            alarmaAudio.volume = 1.0;
+            alarmaAudio.play().catch(() => beepFallback()); // si falla, usa beep
+            return;
+        } catch(e) { beepFallback(); }
+    }
+
+    // Fallback beep Web Audio API (cuando el MP3 no está disponible)
+    function beepFallback() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            alarmaCtx = new AudioContext();
+            let tick = 0;
+            const maxTicks = 16;
+
+            if (alarmaInterval) clearInterval(alarmaInterval);
+
+            function beep() {
+                const osc  = alarmaCtx.createOscillator();
+                const gain = alarmaCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(1200, alarmaCtx.currentTime);
+                gain.gain.setValueAtTime(0.4, alarmaCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, alarmaCtx.currentTime + 0.12);
+                osc.connect(gain);
+                gain.connect(alarmaCtx.destination);
+                osc.start();
+                osc.stop(alarmaCtx.currentTime + 0.12);
+            }
+
+            beep();
+            alarmaInterval = setInterval(() => {
+                tick++;
+                beep();
+                if (tick >= maxTicks) clearInterval(alarmaInterval);
+            }, 500);
+        } catch(e) { console.warn('Audio error:', e); }
+    }
+
+    function pararAlarma() {
+        // Parar MP3
+        if (alarmaAudio) {
+            alarmaAudio.pause();
+            alarmaAudio.currentTime = 0;
+            alarmaAudio = null;
+        }
+        // Parar beep fallback
+        if (alarmaInterval) {
+            clearInterval(alarmaInterval);
+            alarmaInterval = null;
+        }
+        if (alarmaCtx) {
+            try { alarmaCtx.close(); } catch(e) {}
+            alarmaCtx = null;
+        }
+    }
+
+    function vibrar() {
+        // vibración agresiva por 8 segundos
+        if (navigator.vibrate) navigator.vibrate([
+            300,100, 300,100, 300,100,
+            300,100, 300,100, 300,100,
+            300,100, 300,100, 300,100,
+            300,100, 300,100, 300,100
+        ]);
+    }
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+        getFirestore,
+        collection, doc,
+        query, where, orderBy, limit,
+        getDoc, getDocs, onSnapshot, updateDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB117FiWsQTCqbqC8LFPSzPKepHXn4eXcM",
+        authDomain: "delivery-e3221.firebaseapp.com",
+        projectId: "delivery-e3221",
+        storageBucket: "delivery-e3221.firebasestorage.app",
+        messagingSenderId: "555123509664",
+        appId: "1:555123509664:web:8aaaed8f301f81ecc93cc5",
+        measurementId: "G-RH3HJJ6QLZ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+    const messaging = getMessaging(app);
+
+    // ── AUTO-LOGIN desde Flutter (motoId en URL o localStorage) ──
+    async function checkAutoLogin() {
+        const params = new URLSearchParams(window.location.search);
+        const motoId = params.get('motoId') || localStorage.getItem('flutterMotoId');
+        if (!motoId) return;
+        localStorage.removeItem('flutterMotoId'); // limpiar después de usar
+        try {
+            const snap = await getDoc(doc(db, "motorizados", motoId));
+            if (!snap.exists()) return;
+            const data = snap.data();
+            if (data.desactivado) return;
+            motoActual = { id: snap.id, ...data };
+            await cargarComision();
+            const sessionToken = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
+            motoActual.sessionToken = sessionToken;
+            await updateDoc(doc(db, "motorizados", motoActual.id), { sessionToken });
+            const [snapCarrera, snapViaje] = await Promise.all([
+                getDocs(query(collection(db, "carreras"), where("motorizadoId", "==", snap.id), where("estado", "in", ["asignada", "abierto"]))),
+                getDocs(query(collection(db, "viajes"), where("motorizadoId", "==", snap.id), where("estado", "in", ["asignada"])))
+            ]);
+            const tieneCarreraActiva = !snapCarrera.empty || !snapViaje.empty;
+            if (!tieneCarreraActiva) {
+                await updateDoc(doc(db, "motorizados", motoActual.id), { estado: 'disponible' });
+                motoActual.estado = 'disponible';
+            } else {
+                motoActual.estado = 'en carrera';
+            }
+            mostrarPanel();
+        } catch(e) { console.log("Auto-login error:", e); }
+    }
+
+    // ── VAPID KEY (clave pública FCM) ──
+    const vapidKey = 'BOJBuRcER-WGrPbQUGSfe4WBssCt6IQbczg_BTVD0wVWwwo6V-aqMfXWBx1dgGQ1p5MUdifjrWOpd1MK1exH9yA';
+
+    async function registrarTokenFCM(motoId) {
+        try {
+            const permiso = await Notification.requestPermission();
+            console.log("🔔 Permiso: " + permiso);
+            if (permiso !== "granted") return;
+            const token = await getToken(messaging, { vapidKey });
+            if (token) {
+                console.log("✅ Token: " + token.substring(0, 30) + "...");
+                await updateDoc(doc(db, "motorizados", motoId), { fcmToken: token });
+                console.log("✅ Guardado en Firestore");
+            } else {
+                console.log("❌ Token vacío");
+            }
+        } catch(e) {
+            console.log("❌ Error FCM: " + e.message);
+        }
+    }
+
+    let motoActual     = null;
+    let unsubMoto      = null;
+    let unsubPedidos   = null;
+    let unsubHistorial = null;
+    let pctComision    = 10; // valor por defecto, se actualiza desde Firebase
+
+    async function cargarComision() {
+        try {
+            const snap = await getDocs(collection(db, "configuracion"));
+            if (!snap.empty) pctComision = snap.docs[0].data().comision || 10;
+        } catch(e) {}
+    }
+
+    document.getElementById('panelFecha').innerHTML =
+        `<i class="far fa-calendar-alt"></i> ${new Date().toLocaleDateString('es-VE')}`;
+
+    checkAutoLogin();
+
+    // ════════ LOGIN ════════
+    const btnLogin = document.getElementById('btnLogin');
+    const errorBox = document.getElementById('errorBox');
+
+    btnLogin.addEventListener('click', async () => {
+        const tel = document.getElementById('loginTel').value.trim();
+        const pin = document.getElementById('loginPin').value.trim();
+
+        if (!tel || !pin) { showError('Escribe tu teléfono y PIN.'); return; }
+
+        btnLogin.disabled = true;
+        btnLogin.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Verificando...`;
+        errorBox.style.display = 'none';
+
+        try {
+            const snap = await getDocs(query(collection(db, "motorizados"), where("telefono", "==", tel)));
+
+            if (snap.empty)                       { showError('Teléfono no registrado. Contacta al administrador.'); return; }
+            const ref  = snap.docs[0];
+            const data = ref.data();
+            if (data.pin !== pin)                 { showError('PIN incorrecto. Intenta de nuevo.'); return; }
+            if (data.desactivado)                 { showError('Tu cuenta está desactivada. Contacta al administrador.'); return; }
+            if (data.tipo && data.tipo !== 'mototaxi') { showError('Este acceso es solo para Moto Taxi Guayabal.'); return; }
+
+            motoActual = { id: ref.id, ...data };
+            await cargarComision();
+
+            // ── SESSION TOKEN: bloquear sesión duplicada (desactivado temporalmente) ──
+            // if (data.sessionToken && data.estado !== 'desconectado') {
+            //     showError('⚠️ Ya tienes una sesión activa en otro dispositivo. Cierra sesión allá primero.');
+            //     return;
+            // }
+            const sessionToken = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36);
+            motoActual.sessionToken = sessionToken;
+            await updateDoc(doc(db, "motorizados", motoActual.id), { sessionToken });
+
+            // Verificar si tiene una carrera o viaje activo antes de cambiar estado
+            const [snapCarrera, snapViaje] = await Promise.all([
+                getDocs(query(collection(db, "carreras"), where("motorizadoId", "==", ref.id), where("estado", "in", ["asignada", "abierto"]))),
+                getDocs(query(collection(db, "viajes"),   where("motorizadoId", "==", ref.id), where("estado", "in", ["asignada"])))
+            ]);
+            const tieneCarreraActiva = !snapCarrera.empty || !snapViaje.empty;
+
+            // Solo poner disponible si NO tiene carrera activa
+            if (!tieneCarreraActiva) {
+                await updateDoc(doc(db, "motorizados", motoActual.id), { estado: 'disponible' });
+                motoActual.estado = 'disponible';
+            } else {
+                // mantener en carrera
+                motoActual.estado = 'en carrera';
+            }
+            mostrarPanel();
+
+        } catch(err) {
+            showError('Error de conexión. Revisa tu internet.');
+        } finally {
+            btnLogin.disabled = false;
+            btnLogin.innerHTML = `<i class="fas fa-sign-in-alt"></i> Ingresar`;
+        }
+    });
+
+    document.getElementById('loginPin').addEventListener('keypress', e => { if (e.key === 'Enter') btnLogin.click(); });
+
+    function showError(txt) {
+        document.getElementById('errorTxt').textContent = txt;
+        errorBox.style.display = 'block';
+    }
+
+    // ════════ PANEL ════════
+    function mostrarPanel() {
+        document.getElementById('loginCard').classList.add('hidden');
+        document.getElementById('panelCard').classList.remove('hidden');
+        document.getElementById('panelNombre').textContent   = motoActual.nombre;
+        document.getElementById('panelVehiculo').textContent = motoActual.vehiculo;
+        marcarEstado(motoActual.estado || 'disponible');
+        escucharDatos();
+        // FCM token lo maneja Flutter — no se registra aquí
+    }
+
+    function escucharDatos() {
+        // Stats del motorizado en tiempo real
+        unsubMoto = onSnapshot(doc(db, "motorizados", motoActual.id), snap => {
+            if (!snap.exists()) return;
+            const d = snap.data();
+
+            // ── Si el token cambió significa que otro inició sesión — ignorar, el bloqueo ya ocurrió en login ──
+            if (d.sessionToken && d.sessionToken !== motoActual.sessionToken) return;
+
+            // Mantener motoActual sincronizado con Firestore
+            motoActual.entregas          = d.entregas || 0;
+            motoActual.comisionAcumulada = d.comisionAcumulada || 0;
+            motoActual.estado            = d.estado;
+            motoActual.desactivado       = d.desactivado;
+
+            document.getElementById('statEntregas').textContent = motoActual.entregas;
+
+            if (d.estado) marcarEstado(d.estado);
+
+            // Si el admin desactiva al motorizado, forzar desconectado y mostrar aviso
+            const aviso = document.getElementById('avisoCentral');
+            if (d.desactivado) {
+                marcarEstado('desconectado');
+                document.querySelectorAll('.btn-estado').forEach(b => b.disabled = true);
+                aviso.style.display = 'block';
+            } else {
+                document.querySelectorAll('.btn-estado').forEach(b => b.disabled = false);
+                aviso.style.display = 'none';
+            }
+        });
+
+        // Pedidos activos asignados a este motorizado
+        unsubPedidos = onSnapshot(
+            query(collection(db, "carreras"), where("motorizadoId", "==", motoActual.id), where("estado", "in", ["asignada", "pendiente"])),
+            snap => renderPedidos(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+        );
+
+        // Carreras abiertas disponibles para tomar
+        let carrerasAbiertas = new Set(); // para detectar nuevas
+        let primeraCarrerasCarga = true; // flag para ignorar carga inicial
+        onSnapshot(
+            query(collection(db, "carreras"), where("estado", "==", "abierto")),
+            snap => {
+                const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                // Detectar si llegó una carrera nueva (no estaba antes)
+                if (!primeraCarrerasCarga && motoActual?.estado === 'disponible') {
+                    // Sonido manejado por FCM (Flutter) — solo vibración leve como respaldo
+                    snap.docChanges().forEach(change => {
+                        if (change.type === 'added' && !carrerasAbiertas.has(change.doc.id)) {
+                            vibrar();
+                        }
+                    });
+                }
+                primeraCarrerasCarga = false;
+                // Actualizar el set de carreras conocidas
+                carrerasAbiertas = new Set(snap.docs.map(d => d.id));
+
+                renderCarrerasDisponibles(lista);
+            }
+        );
+
+        // Viajes asignados a este motorizado
+        onSnapshot(
+            query(collection(db, "viajes"), where("motorizadoId", "==", motoActual.id), where("estado", "in", ["asignada"])),
+            snap => renderViajesAsignados(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+        );
+
+        // Viajes abiertos disponibles para tomar
+        let viajesAbiertos = new Set();
+        let primeraViajesCarga = true; // flag para ignorar carga inicial
+        onSnapshot(
+            query(collection(db, "viajes"), where("estado", "==", "abierto")),
+            snap => {
+                const lista = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (!primeraViajesCarga && motoActual?.estado === 'disponible') {
+                    // Sonido manejado por FCM (Flutter) — solo vibración leve como respaldo
+                    snap.docChanges().forEach(change => {
+                        if (change.type === 'added' && !viajesAbiertos.has(change.doc.id)) {
+                            vibrar();
+                        }
+                    });
+                }
+                primeraViajesCarga = false;
+                viajesAbiertos = new Set(snap.docs.map(d => d.id));
+                renderViajesDisponibles(lista);
+            }
+        );
+
+        // Historial últimas 10 carreras (sin orderBy para evitar índice compuesto)
+        unsubHistorial = onSnapshot(
+            query(collection(db, "carreras"), where("motorizadoId", "==", motoActual.id)),
+            snap => {
+                const lista = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => {
+                        const ta = a.fechaHora?.toDate ? a.fechaHora.toDate() : new Date(0);
+                        const tb = b.fechaHora?.toDate ? b.fechaHora.toDate() : new Date(0);
+                        return tb - ta;
+                    })
+                    .slice(0, 10);
+                renderHistorial(lista);
+            }
+        );
+    }
+
+    // ── RENDER VIAJES DISPONIBLES (para tomar) ──
+    let viajesDisponiblesData = [];
+
+    function renderViajesDisponibles(lista) {
+        viajesDisponiblesData = lista;
+        renderSeccionDisponibles();
+    }
+
+    function renderSeccionDisponibles() {
+        const seccion = document.getElementById('seccionCarrerasDisponibles');
+        const cont    = document.getElementById('listaCarrerasDisponibles');
+
+        if (motoActual?.estado !== 'disponible') {
+            seccion.style.display = 'none';
+            return;
+        }
+
+        if (!viajesDisponiblesData.length && !carrerasDisponiblesData.length) {
+            seccion.style.display = 'none';
+            return;
+        }
+
+        seccion.style.display = 'block';
+
+        // Filtrar los ignorados localmente
+        const viajesFiltrados   = viajesDisponiblesData.filter(v => !viajesIgnorados.has(v.id));
+        const carrerasFiltradas = carrerasDisponiblesData.filter(c => !carrerasIgnoradas.has(c.id));
+
+        if (!viajesFiltrados.length && !carrerasFiltradas.length) {
+            seccion.style.display = 'none';
+            pararAlarma();
+            return;
+        }
+
+        // Render viajes
+        const viajesHTML = viajesFiltrados.map(v => `
+            <div class="carrera-disponible" style="border-color:#f5b06460; background:linear-gradient(145deg,#2a2010,#1e1a0f);">
+                <h4 style="color:#fadcb0;"><i class="fas fa-motorcycle"></i> Viaje · Moto Taxi</h4>
+                <div class="pedido-row"><i class="fas fa-user"></i> ${v.cliente?.nombre || '—'}</div>
+                <div class="pedido-row"><i class="fas fa-phone-alt"></i> ${v.cliente?.telefono || '—'}</div>
+                <div class="pedido-row"><i class="fas fa-map-marker-alt"></i> <strong>Origen:</strong> ${v.cliente?.origen || '—'}</div>
+                <div class="pedido-row"><i class="fas fa-flag-checkered"></i> <strong>Destino:</strong> ${v.cliente?.destino || '—'}</div>
+                ${v.cliente?.gps && v.cliente.gps !== 'No compartida'
+                    ? `<a class="btn-gps-pedido" href="javascript:void(0)" onclick="abrirNavegacion('${v.cliente.gps}')"><i class="fas fa-map-marker-alt"></i> 🧭 Navegar</a>`
+                    : ''}
+                <button class="btn-aceptar-carrera btn-aceptar-viaje" data-vid="${v.id}"
+                    style="background:linear-gradient(145deg,#f5b064,#d68f44); color:#0d1a24; box-shadow:0 6px 16px -6px #b56f2e;">
+                    <i class="fas fa-hand-paper"></i> Aceptar viaje
+                </button>
+                <button class="btn-cancelar btn-silenciar-viaje" data-vid="${v.id}">
+                    <i class="fas fa-bell-slash"></i> No me interesa · Silenciar
+                </button>
+            </div>`).join('');
+
+        // Render carreras
+        const carrerasHTML = carrerasFiltradas.map(c => `
+            <div class="carrera-disponible">
+                <h4><i class="fas fa-store"></i> ${c.restaurante || '—'}</h4>
+                <div class="pedido-row"><i class="fas fa-map-pin"></i> ${c.cliente?.barrio || '—'}</div>
+                <button class="btn-aceptar-carrera btn-aceptar-carrera-item" data-cid="${c.id}">
+                    <i class="fas fa-hand-paper"></i> Aceptar carrera
+                </button>
+                <button class="btn-cancelar btn-silenciar-carrera" data-cid="${c.id}">
+                    <i class="fas fa-bell-slash"></i> No me interesa · Silenciar
+                </button>
+            </div>`).join('');
+
+        cont.innerHTML = viajesHTML + carrerasHTML;
+
+        // Listeners viajes
+        cont.querySelectorAll('.btn-aceptar-viaje').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (motoActual.estado !== 'disponible') { console.log('Solo puedes aceptar si estás disponible.'); return; }
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aceptando...';
+                pararAlarma();
+                try {
+                    await updateDoc(doc(db, 'viajes', btn.dataset.vid), {
+                        estado: 'asignada',
+                        motorizadoId: motoActual.id,
+                        motorizadoNombre: motoActual.nombre
+                    });
+                    await updateDoc(doc(db, 'motorizados', motoActual.id), { estado: 'en carrera' });
+                } catch(e) {
+                    console.log('❌ Otro motorizado lo tomó primero.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-hand-paper"></i> Aceptar viaje';
+                }
+            });
+        });
+
+        // Listeners carreras
+        cont.querySelectorAll('.btn-aceptar-carrera-item').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (motoActual.estado !== 'disponible') { console.log('Solo puedes aceptar si estás disponible.'); return; }
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aceptando...';
+                pararAlarma();
+                try {
+                    await updateDoc(doc(db, 'carreras', btn.dataset.cid), {
+                        estado: 'asignada',
+                        motorizadoId: motoActual.id,
+                        motorizadoNombre: motoActual.nombre
+                    });
+                    await updateDoc(doc(db, 'motorizados', motoActual.id), { estado: 'en carrera' });
+                } catch(e) {
+                    console.log('❌ Otro motorizado la tomó primero.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-hand-paper"></i> Aceptar carrera';
+                }
+            });
+        });
+
+        // Listeners silenciar viaje
+        cont.querySelectorAll('.btn-silenciar-viaje').forEach(btn => {
+            btn.addEventListener('click', () => {
+                viajesIgnorados.add(btn.dataset.vid);
+                pararAlarma();
+                renderSeccionDisponibles();
+            });
+        });
+
+        // Listeners silenciar carrera
+        cont.querySelectorAll('.btn-silenciar-carrera').forEach(btn => {
+            btn.addEventListener('click', () => {
+                carrerasIgnoradas.add(btn.dataset.cid);
+                pararAlarma();
+                renderSeccionDisponibles();
+            });
+        });
+    }
+
+    // ── RENDER VIAJES ASIGNADOS (para confirmar) ──
+    let viajesAsignadosData = [];
+
+    function renderViajesAsignados(lista) {
+        viajesAsignadosData = lista;
+        renderSeccionAsignados();
+    }
+
+    function renderSeccionAsignados() {
+        const cont = document.getElementById('pedidosPendientes');
+        document.getElementById('labelPendientes').textContent = viajesAsignadosData.length ? `${viajesAsignadosData.length} activo(s)` : '';
+
+        if (!viajesAsignadosData.length) {
+            cont.innerHTML = `<div class="empty-state"><i class="fas fa-check-circle"></i><br>Sin servicios asignados</div>`;
+            return;
+        }
+
+        cont.innerHTML = viajesAsignadosData.map(v => `
+            <div class="pedido-pendiente" style="border-color:#f5b06460; background:linear-gradient(145deg,#2a2010,#1f1a0c);">
+                <h4 style="color:#fadcb0;"><i class="fas fa-motorcycle" style="margin-right:6px;"></i>Viaje · Moto Taxi</h4>
+                <div class="pedido-row"><i class="fas fa-user"></i> ${v.cliente?.nombre || '—'}</div>
+                <div class="pedido-row"><i class="fas fa-phone-alt"></i>
+                    ${v.cliente?.telefono
+                        ? `<a href="javascript:void(0)"
+                              data-tel="${v.cliente.telefono}" onclick="abrirWA(this.dataset.tel)" 
+                              style="color:#25D366; font-weight:600; text-decoration:none;">
+                              <i class="fab fa-whatsapp"></i> ${v.cliente.telefono}
+                           </a>`
+                        : '—'}
+                </div>
+                <div class="pedido-row"><i class="fas fa-map-marker-alt"></i> <strong>Origen:</strong> ${v.cliente?.origen || '—'}</div>
+                <div class="pedido-row"><i class="fas fa-flag-checkered"></i> <strong>Destino:</strong> ${v.cliente?.destino || '—'}</div>
+                ${v.cliente?.gps && v.cliente.gps !== 'No compartida'
+                    ? `<a class="btn-gps-pedido" href="javascript:void(0)" onclick="abrirNavegacion('${v.cliente.gps}')"><i class="fas fa-map-marker-alt"></i> 🧭 Navegar</a>`
+                    : ''}
+                <button class="btn-entregado btn-completar-viaje" data-viaje-id="${v.id}">
+                    <i class="fas fa-flag-checkered"></i> Confirmar llegada
+                </button>
+            </div>`).join('');
+
+        cont.querySelectorAll('.btn-completar-viaje').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('¿Confirmar llegada a destino?')) return;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+                try {
+                    await updateDoc(doc(db, 'viajes', btn.dataset.viajeId), {
+                        estado: 'completado'
+                    });
+                    await updateDoc(doc(db, 'motorizados', motoActual.id), {
+                        estado:   'disponible',
+                        entregas: (motoActual.entregas || 0) + 1
+                    });
+                    motoActual.entregas = (motoActual.entregas || 0) + 1;
+                } catch(e) {
+                    console.log('❌ Error al confirmar el viaje.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-flag-checkered"></i> Confirmar llegada';
+                }
+            });
+        });
+    }
+
+    // carreras disponibles — ahora gestionadas dentro de renderSeccionDisponibles
+    let carrerasDisponiblesData = [];
+
+    // IDs ignorados localmente (silenciados sin tocar Firestore)
+    const viajesIgnorados   = new Set();
+    const carrerasIgnoradas = new Set();
+
+    function renderCarrerasDisponibles(lista) {
+        carrerasDisponiblesData = lista;
+        renderSeccionDisponibles();
+    }
+
+    function renderPedidos(lista) {
+        const cont = document.getElementById('pedidosPendientes');
+        document.getElementById('labelPendientes').textContent = lista.length ? `${lista.length} activo(s)` : '';
+        if (!lista.length) { cont.innerHTML = `<div class="empty-state"><i class="fas fa-check-circle"></i><br>Sin pedidos asignados</div>`; return; }
+        cont.innerHTML = lista.map(c => `
+            <div class="pedido-pendiente" id="pedido-card-${c.id}">
+                <h4><i class="fas fa-motorcycle"></i> ${c.restaurante || '—'}</h4>
+                <div class="pedido-row"><i class="fas fa-user"></i> ${c.cliente?.nombre || '—'}</div>
+                <div class="pedido-row"><i class="fas fa-phone-alt"></i>
+                    ${c.cliente?.telefono
+                        ? `<a href="javascript:void(0)"
+                              data-tel="${c.cliente.telefono}" onclick="abrirWA(this.dataset.tel)" 
+                              style="color:#25D366; font-weight:600; text-decoration:none;">
+                              <i class="fab fa-whatsapp"></i> ${c.cliente.telefono}
+                           </a>`
+                        : '—'}
+                </div>
+                <div class="pedido-row"><i class="fas fa-map-pin"></i> ${c.cliente?.barrio || '—'}</div>
+                <div class="pedido-row"><i class="fas fa-home"></i> ${c.cliente?.direccion || '—'}</div>
+                ${c.cliente?.gps && c.cliente.gps !== 'No compartida'
+                    ? `<a class="btn-gps-pedido" href="javascript:void(0)" onclick="abrirNavegacion('${c.cliente.gps}')"><i class="fas fa-map-marker-alt"></i> 🧭 Navegar</a>`
+                    : ''}
+
+                <button class="btn-entregado" data-pedido-id="${c.id}" data-moto-id="${motoActual.id}" data-precio="${c.precioCobrado || 0}">
+                    <i class="fas fa-check-circle"></i> Confirmar entrega
+                </button>
+                <button class="btn-cancelar btn-cancelar-carrera" data-pedido-id="${c.id}">
+                    <i class="fas fa-times-circle"></i> Cancelar carrera
+                </button>
+            </div>`).join('');
+
+        // Listeners botón entregado
+        cont.querySelectorAll('.btn-entregado').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const pedidoId = btn.dataset.pedidoId;
+                const motoId   = btn.dataset.motoId;
+                const monto    = parseFloat(btn.dataset.precio) || 0;
+
+                if (!confirm('¿Confirmar entrega?')) return;
+
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+
+                try {
+                    await updateDoc(doc(db, 'carreras', pedidoId), {
+                        estado: 'completado'
+                    });
+                    await updateDoc(doc(db, 'motorizados', motoId), {
+                        estado: 'disponible',
+                        entregas: (motoActual.entregas || 0) + 1
+                    });
+                    motoActual.entregas = (motoActual.entregas || 0) + 1;
+                } catch(e) {
+                    console.log('❌ Error al registrar la entrega.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar entrega';
+                }
+            });
+        });
+
+        // Listeners botón cancelar carrera
+        cont.querySelectorAll('.btn-cancelar-carrera').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('¿Cancelar esta carrera? Volverá a estar disponible para otros motorizados.')) return;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelando...';
+                try {
+                    await updateDoc(doc(db, 'carreras', btn.dataset.pedidoId), {
+                        estado: 'abierto',
+                        motorizadoId: null,
+                        motorizadoNombre: null
+                    });
+                    await updateDoc(doc(db, 'motorizados', motoActual.id), { estado: 'disponible' });
+                } catch(e) {
+                    console.log('❌ Error al cancelar la carrera.');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-times-circle"></i> Cancelar carrera';
+                }
+            });
+        });
+    }
+
+    function renderHistorial(lista) {
+        const cont = document.getElementById('historialCarreras');
+        document.getElementById('labelHistorial').textContent = lista.length ? `${lista.length} registradas` : '';
+
+        // resumen hoy
+        const hoy    = new Date().toDateString();
+        const deHoy  = lista.filter(c => c.fechaHora?.toDate && c.fechaHora.toDate().toDateString() === hoy);
+        const cobrado = deHoy.reduce((a, c) => a + (parseFloat(c.precioCobrado) || 0), 0);
+        document.getElementById('resEntregas').textContent    = deHoy.length;
+
+
+
+        if (!lista.length) { cont.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><br>Sin historial aún</div>`; return; }
+        cont.innerHTML = lista.map(c => {
+            const hora = c.fechaHora?.toDate ? c.fechaHora.toDate().toLocaleTimeString('es-VE', { hour:'2-digit', minute:'2-digit' }) : '--:--';
+            return `
+            <div class="carrera-item">
+                <div>
+                    <div class="carrera-nombre"><i class="fas fa-store" style="color:#f5b06470; margin-right:6px;"></i>${c.restaurante || '—'}</div>
+                    <div class="carrera-sub"><i class="fas fa-map-marker-alt" style="margin-right:4px;"></i>${c.cliente?.barrio || '—'} · ${hora}</div>
+                </div>
+                <div class="carrera-monto">$${(parseFloat(c.precioCobrado) || 0).toFixed(2)}</div>
+            </div>`;
+        }).join('');
+    }
+
+    // Los botones de estado son solo indicadores visuales — no responden al clic
+
+    function marcarEstado(estado) {
+        document.querySelectorAll('.btn-estado').forEach(b => {
+            b.classList.toggle('activo', b.dataset.estado === estado);
+            // Bloquear botones cuando está en carrera
+            if (estado === 'en carrera') {
+                b.disabled = true;
+                b.style.opacity = b.dataset.estado === 'en carrera' ? '1' : '0.4';
+            } else if (estado === 'disponible') {
+                b.disabled = false;
+                b.style.opacity = '1';
+            }
+        });
+    }
+
+    // ════════ LOGOUT ════════
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+        if (motoActual) {
+            try { await updateDoc(doc(db, "motorizados", motoActual.id), { estado: 'desconectado', sessionToken: null }); } catch(_) {}
+        }
+        [unsubMoto, unsubPedidos, unsubHistorial].forEach(u => u && u());
+        motoActual = null;
+        document.getElementById('panelCard').classList.add('hidden');
+        document.getElementById('loginCard').classList.remove('hidden');
+        document.getElementById('loginTel').value = '';
+        document.getElementById('loginPin').value = '';
+        errorBox.style.display = 'none';
+    });
+
+</script>
+<script>
+        function abrirWA(tel) {
+            const num = tel.replace(/^0/, '').replace(/[^0-9]/g, '');
+            abrirExterno('https://wa.me/58' + num + '?text=Buenas%2C%20confirma%20el%20servicio%20de%20mototaxi%3F');
+        }
+
+        function abrirNavegacion(gpsUrl) {
+            const match = gpsUrl.match(/q=([\d.-]+),([\d.-]+)/);
+            if (match) {
+                const lat = match[1];
+                const lng = match[2];
+                const url = 'geo:' + lat + ',' + lng + '?q=' + lat + ',' + lng;
+                abrirExterno(url);
+            } else {
+                abrirExterno(gpsUrl);
+            }
+        }
+
+        function abrirExterno(url) {
+            window.location.href = 'extapp://' + encodeURIComponent(url);
+        }
+
+</script>
+    <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SW registrado:', reg.scope))
+                    .catch(err => console.warn('SW error:', err));
+            });
+        }
+    </script>
+</body>
+</html>

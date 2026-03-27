@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5">
+    <title>Moto Taxi Guayabal · Solicitar viaje</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --amber: #f5b064;
+            --amber-dark: #d68f44;
+            --amber-glow: rgba(245,176,100,0.18);
+            --bg: #090d12;
+            --card: rgba(14, 20, 30, 0.95);
+            --input-bg: #131d28;
+            --input-border: rgba(245,176,100,0.18);
+            --text: #e8eef5;
+            --muted: #7a8fa3;
+            --success: #4caf82;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(245,176,100,0.07), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 110%, rgba(245,176,100,0.05), transparent);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem;
+            position: relative;
+        }
+
+        /* ── USER BAR (logged in) ── */
+        .user-bar {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--card);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(245,176,100,0.2);
+            border-radius: 60px;
+            padding: 0.5rem 1rem 0.5rem 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--amber);
+        }
+
+        .user-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text);
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid rgba(245,176,100,0.3);
+            color: var(--muted);
+            padding: 0.4rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-logout:hover {
+            background: rgba(245,176,100,0.1);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--card);
+            border: 1px solid rgba(245,176,100,0.2);
+            border-radius: 36px;
+            padding: 2.2rem 1.8rem 2rem;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.03);
+            color: var(--text);
+            animation: fadeUp 0.5s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card headers */
+        .card-header {
+            text-align: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .card-icon {
+            font-size: 3.5rem;
+            display: block;
+            margin-bottom: 0.75rem;
+            filter: drop-shadow(0 0 12px rgba(245,176,100,0.4));
+        }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #fce8c8;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+
+        .card-title span {
+            color: var(--amber);
+        }
+
+        .card-subtitle {
+            color: var(--muted);
+            font-size: 0.88rem;
+            margin-top: 0.5rem;
+        }
+
+        /* ── INPUTS ── */
+        .field {
+            margin-bottom: 1.2rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #a8b8cc;
+            margin-bottom: 0.45rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.95rem 1.2rem;
+            border-radius: 20px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.97rem;
+            transition: border-color 0.2s, background 0.2s;
+            resize: none;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5b064' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 1.2rem center;
+        }
+
+        input::placeholder, textarea::placeholder { color: #3e5068; }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: rgba(245,176,100,0.55);
+            background: #162030;
+        }
+
+        /* ── BOTÓN GPS ── */
+        .btn-gps {
+            width: 100%;
+            background: transparent;
+            border: 1px solid rgba(245,176,100,0.3);
+            color: #c8d8e8;
+            padding: 0.85rem 1.2rem;
+            border-radius: 20px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1.2rem;
+        }
+
+        .btn-gps:hover {
+            background: rgba(245,176,100,0.07);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .btn-gps i { color: var(--amber); }
+
+        .gps-status {
+            font-size: 0.78rem;
+            color: var(--muted);
+            text-align: center;
+            margin-top: -0.8rem;
+            margin-bottom: 1rem;
+            min-height: 1.2rem;
+            transition: color 0.2s;
+        }
+
+        /* ── BOTÓN PRINCIPAL ── */
+        .btn-amber {
+            width: 100%;
+            background: linear-gradient(145deg, #f5b064, #d68f44);
+            border: none;
+            color: #0d1820;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.3px;
+            padding: 1rem 1.2rem;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 10px 28px -8px rgba(180,110,40,0.5);
+            margin-top: 0.5rem;
+        }
+
+        .btn-amber:hover {
+            box-shadow: 0 14px 32px -8px rgba(180,110,40,0.7);
+            transform: scale(0.98);
+        }
+        .btn-amber:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .note {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.72rem;
+            margin-top: 1rem;
+        }
+
+        /* ── CONFIRMACIÓN ── */
+        #confirmacionCard {
+            display: none;
+            background: var(--card);
+            border: 1px solid rgba(245,176,100,0.2);
+            border-radius: 36px;
+            padding: 2.2rem 1.8rem;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.8);
+            color: var(--text);
+            text-align: center;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .conf-check {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 1rem;
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
+
+        @keyframes pop {
+            from { transform: scale(0.3); opacity: 0; }
+            to   { transform: scale(1);   opacity: 1; }
+        }
+
+        #confirmacionCard h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: #fce8c8;
+            margin-bottom: 0.4rem;
+        }
+
+        .resumen {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 20px;
+            padding: 1rem 1.3rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            font-size: 0.88rem;
+            color: #b0c4d8;
+            line-height: 2.2;
+        }
+
+        .resumen i { color: var(--amber); width: 18px; margin-right: 6px; }
+
+        .btn-nuevo {
+            width: 100%;
+            background: linear-gradient(145deg, #f5b064, #d68f44);
+            border: none;
+            color: #0d1820;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 1rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+            box-shadow: 0 10px 28px -8px rgba(180,110,40,0.5);
+        }
+
+        .btn-cancelar {
+            width: 100%;
+            background: transparent;
+            border: 1px solid rgba(245,176,100,0.3);
+            color: #9ab0c9;
+            font-family: 'Syne', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 0.9rem;
+            border-radius: 60px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+            box-shadow: none;
+        }
+
+        .btn-cancelar:hover {
+            background: rgba(245,176,100,0.1);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 380px) {
+            .card, #confirmacionCard { padding: 1.6rem 1.1rem; border-radius: 28px; }
+            .card-title { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- User Bar -->
+    <div id="userBar" class="user-bar hidden">
+        <img id="userAvatar" class="user-avatar" alt="avatar">
+        <span id="userName" class="user-name"></span>
+        <button id="logoutBtn" class="btn-logout"><i class="fas fa-sign-out-alt"></i> Salir</button>
+    </div>
+
+    <!-- CARD 1 — LOGIN -->
+    <div id="loginCard" class="card">
+        <div class="card-header">
+            <span class="card-icon">🛵</span>
+            <h1 class="card-title">Moto Taxi <span>Guayabal</span></h1>
+            <div class="card-subtitle">San Jerónimo de Guayabal</div>
+        </div>
+        <button id="googleLoginBtn" class="btn-amber">
+            <i class="fab fa-google"></i> Continuar con Google
+        </button>
+        <div class="note">
+            <i class="fas fa-lock"></i> Accede para solicitar viajes
+        </div>
+    </div>
+
+    <!-- CARD 2 — TELÉFONO -->
+    <div id="telefonoCard" class="card hidden">
+        <div class="card-header">
+            <span class="card-icon">📱</span>
+            <h2 class="card-title">Un último paso</h2>
+            <div class="card-subtitle">Registra tu número para continuar</div>
+        </div>
+        <div class="field">
+            <label>Número de teléfono</label>
+            <input type="tel" id="telefonoInput" placeholder="0412-1234567">
+        </div>
+        <button id="registrarTelefonoBtn" class="btn-amber">
+            <i class="fas fa-arrow-right"></i> Continuar
+        </button>
+        <div class="note">
+            <i class="fas fa-shield-alt"></i> Solo lo usaremos para coordinar tu viaje
+        </div>
+    </div>
+
+    <!-- CARD 3 — FORMULARIO VIAJE -->
+    <div id="formCard" class="card hidden">
+        <div class="card-header">
+            <span class="card-icon">🛵</span>
+            <h2 class="card-title">Moto Taxi <span>Guayabal</span></h2>
+            <div class="card-subtitle">Cuéntanos tu viaje</div>
+        </div>
+
+        <div class="field">
+            <label>¿Dónde te recogemos?</label>
+            <textarea id="origenTextarea" rows="2" placeholder="Ej. Av. Principal, frente al abasto Las Mercedes..."></textarea>
+        </div>
+
+        <button id="btnGpsOrigen" class="btn-gps">
+            <i class="fas fa-satellite-dish"></i> Usar mi ubicación GPS
+        </button>
+        <div class="gps-status" id="gpsStatus">📍 Ubicación no compartida</div>
+        <input type="hidden" id="origenGpsUrl" value="">
+
+        <div class="field">
+            <label>¿A dónde vas?</label>
+            <select id="zonaSelect">
+                <option value="">-- Seleccionar zona de destino --</option>
+            </select>
+        </div>
+
+        <button id="btnSolicitar" class="btn-amber">
+            <i class="fas fa-paper-plane"></i> Solicitar moto
+        </button>
+        <div class="note">
+            <i class="fas fa-motorcycle"></i> El primer conductor disponible aceptará tu viaje
+        </div>
+    </div>
+
+    <!-- CONFIRMACIÓN -->
+    <div id="confirmacionCard">
+        <div id="estadoEsperando">
+            <span class="conf-check">✅</span>
+            <h2>¡Viaje solicitado!</h2>
+            <p>Esperando que un conductor acepte tu solicitud...</p>
+            <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin:1.2rem 0; color:#f5b064; font-size:0.9rem;">
+                <i class="fas fa-circle-notch fa-spin"></i> Buscando conductor disponible
+            </div>
+            <div class="resumen" id="resumenViaje"></div>
+            <button id="cancelarViajeBtn" class="btn-cancelar">
+                <i class="fas fa-times"></i> Cancelar solicitud
+            </button>
+        </div>
+        <div id="estadoAceptado" style="display:none;">
+            <span class="conf-check">🛵</span>
+            <h2 style="color:#8de0a0;">¡Tu moto está en camino!</h2>
+            <p>El conductor aceptó tu solicitud y va hacia ti.</p>
+            <div class="resumen" id="resumenMotorizado" style="border-color:rgba(46,204,113,0.3); background:#0f2218;"></div>
+            <button class="btn-nuevo" id="nuevoViajeBtn">
+                <i class="fas fa-plus-circle"></i> Solicitar otro viaje
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, updateDoc, doc, onSnapshot, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+        import { getAuth, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, browserLocalPersistence, setPersistence, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB117FiWsQTCqbqC8LFPSzPKepHXn4eXcM",
+            authDomain: "delivery-e3221.firebaseapp.com",
+            projectId: "delivery-e3221",
+            storageBucket: "delivery-e3221.firebasestorage.app",
+            messagingSenderId: "555123509664",
+            appId: "1:555123509664:web:8aaaed8f301f81ecc93cc5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Persistencia local — no pide cuenta en cada visita
+        setPersistence(auth, browserLocalPersistence).catch(console.error);
+
+        // Capturar resultado del redirect si venimos de Google
+        getRedirectResult(auth).then(result => {
+            if (result?.user) handleUserLogin(result.user);
+        }).catch(console.error);
+
+        // Elementos DOM
+        const loginCard = document.getElementById('loginCard');
+        const telefonoCard = document.getElementById('telefonoCard');
+        const formCard = document.getElementById('formCard');
+        const userBar = document.getElementById('userBar');
+        const userAvatar = document.getElementById('userAvatar');
+        const userNameSpan = document.getElementById('userName');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const registrarTelefonoBtn = document.getElementById('registrarTelefonoBtn');
+        const telefonoInput = document.getElementById('telefonoInput');
+        const btnSolicitar = document.getElementById('btnSolicitar');
+        const btnGps = document.getElementById('btnGpsOrigen');
+        const gpsStatus = document.getElementById('gpsStatus');
+        const gpsUrlHidden = document.getElementById('origenGpsUrl');
+        const zonaSelect = document.getElementById('zonaSelect');
+        const origenTextarea = document.getElementById('origenTextarea');
+        const confirmacionCard = document.getElementById('confirmacionCard');
+        const cancelarViajeBtn = document.getElementById('cancelarViajeBtn');
+        const nuevoViajeBtn = document.getElementById('nuevoViajeBtn');
+
+        let currentUser = null;
+        let currentUserData = null; // { nombre, telefono }
+        let currentViajeId = null;
+        let unsubViaje = null;
+
+        function showCard(cardToShow) {
+            loginCard.classList.add('hidden');
+            telefonoCard.classList.add('hidden');
+            formCard.classList.add('hidden');
+            cardToShow.classList.remove('hidden');
+        }
+
+        function cargarZonas() {
+            onSnapshot(collection(db, 'zonas'), snap => {
+                const zonas = snap.docs
+                    .map(d => ({ id: d.id, ...d.data() }))
+                    .sort((a, b) => a.nombre.localeCompare(b.nombre));
+                zonaSelect.innerHTML = '<option value="">-- Seleccionar zona de destino --</option>';
+                zonas.forEach(z => {
+                    const opt = document.createElement('option');
+                    opt.value = `${z.nombre} | $${parseFloat(z.precio).toFixed(2)}`;
+                    opt.textContent = `${z.nombre}  $${parseFloat(z.precio).toFixed(2)}`;
+                    zonaSelect.appendChild(opt);
+                });
+            });
+        }
+
+        async function checkUserPhone(uid) {
+            const q = query(collection(db, 'clientesMototaxi'), where('uid', '==', uid));
+            const snap = await getDocs(q);
+            if (!snap.empty) {
+                const data = snap.docs[0].data();
+                return { exists: true, telefono: data.telefono, nombre: data.nombre };
+            }
+            return { exists: false, telefono: null, nombre: null };
+        }
+
+        async function registrarTelefono(uid, nombre, telefono) {
+            await addDoc(collection(db, 'clientesMototaxi'), {
+                uid: uid,
+                nombre: nombre,
+                telefono: telefono,
+                fechaRegistro: serverTimestamp(),
+                totalViajes: 0
+            });
+        }
+
+        function showAuthenticatedUI(user) {
+            userBar.classList.remove('hidden');
+            userAvatar.src = user.photoURL || 'https://ui-avatars.com/api/?background=f5b064&color=0d1820&bold=true&size=40&name=' + encodeURIComponent(user.displayName || 'U');
+            userNameSpan.textContent = user.displayName || user.email?.split('@')[0] || 'Usuario';
+        }
+
+        async function handleUserLogin(user) {
+            currentUser = user;
+            showAuthenticatedUI(user);
+            
+            const phoneCheck = await checkUserPhone(user.uid);
+            
+            if (phoneCheck.exists) {
+                currentUserData = { nombre: phoneCheck.nombre, telefono: phoneCheck.telefono };
+                showCard(formCard);
+                cargarZonas();
+            } else {
+                currentUserData = { nombre: user.displayName || '', telefono: null };
+                showCard(telefonoCard);
+                telefonoInput.value = '';
+            }
+        }
+
+        async function handleRegistrarTelefono() {
+            const telefono = telefonoInput.value.trim();
+            if (!telefono) {
+                alert('📱 Ingresa tu número de teléfono');
+                return;
+            }
+            
+            registrarTelefonoBtn.disabled = true;
+            registrarTelefonoBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+            
+            try {
+                await registrarTelefono(currentUser.uid, currentUserData.nombre, telefono);
+                currentUserData.telefono = telefono;
+                showCard(formCard);
+                cargarZonas();
+            } catch (err) {
+                console.error('Error al registrar teléfono:', err);
+                alert('❌ Error al registrar teléfono. Intenta de nuevo.');
+            } finally {
+                registrarTelefonoBtn.disabled = false;
+                registrarTelefonoBtn.innerHTML = '<i class="fas fa-arrow-right"></i> Continuar';
+            }
+        }
+
+        function resetUI() {
+            confirmacionCard.style.display = 'none';
+            document.getElementById('estadoEsperando').style.display = 'block';
+            document.getElementById('estadoAceptado').style.display = 'none';
+            btnSolicitar.disabled = false;
+            btnSolicitar.innerHTML = '<i class="fas fa-paper-plane"></i> Solicitar moto';
+            origenTextarea.value = '';
+            gpsUrlHidden.value = '';
+            gpsStatus.innerHTML = '📍 Ubicación no compartida';
+            gpsStatus.style.color = '';
+            zonaSelect.value = '';
+            currentViajeId = null;
+            if (unsubViaje) {
+                unsubViaje();
+                unsubViaje = null;
+            }
+            sessionStorage.removeItem('viajeId');
+        }
+
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                currentUser = null;
+                currentUserData = null;
+                userBar.classList.add('hidden');
+                showCard(loginCard);
+                resetUI();
+            } catch (err) {
+                console.error('Error al cerrar sesión:', err);
+            }
+        }
+
+        async function handleGoogleLogin() {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                if (result?.user) await handleUserLogin(result.user);
+            } catch (error) {
+                if (error.code === 'auth/popup-blocked' || error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') {
+                    await signInWithRedirect(auth, provider);
+                } else {
+                    console.error('Error en Google Sign-In:', error);
+                    alert('Error al iniciar sesión: ' + error.message);
+                }
+            }
+        }
+
+        function escucharViaje(viajeId) {
+            if (unsubViaje) unsubViaje();
+            const viajeDocRef = doc(db, "viajes", viajeId);
+            unsubViaje = onSnapshot(viajeDocRef, (snap) => {
+                if (!snap.exists()) return;
+                const data = snap.data();
+
+                if (data.estado === 'asignada' && data.motorizadoNombre) {
+                    if (unsubViaje) unsubViaje();
+                    unsubViaje = null;
+
+                    document.getElementById('estadoEsperando').style.display = 'none';
+                    document.getElementById('estadoAceptado').style.display = 'block';
+                    document.getElementById('resumenMotorizado').innerHTML = `
+                        <div><i class="fas fa-user" style="color:#2ecc71;"></i> <strong>${data.motorizadoNombre}</strong> viene hacia ti</div>
+                        <div style="margin-top:0.5rem; font-size:0.82rem; color:#6b8f6b;">
+                            <i class="fas fa-info-circle"></i> Permanece en tu ubicación
+                        </div>
+                    `;
+
+                    if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+                    try {
+                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                        [0, 0.15, 0.3].forEach(t => {
+                            const osc = ctx.createOscillator();
+                            const gain = ctx.createGain();
+                            osc.frequency.value = 880;
+                            osc.type = 'sine';
+                            gain.gain.setValueAtTime(0.4, ctx.currentTime + t);
+                            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.2);
+                            osc.connect(gain);
+                            gain.connect(ctx.destination);
+                            osc.start(ctx.currentTime + t);
+                            osc.stop(ctx.currentTime + t + 0.2);
+                        });
+                    } catch(e) {}
+                }
+            });
+        }
+
+        async function cancelarViaje() {
+            if (!currentViajeId) {
+                console.warn('No hay viaje activo para cancelar');
+                return;
+            }
+            
+            if (!confirm('¿Cancelar esta solicitud?')) return;
+            
+            // Mostrar estado de carga en el botón
+            const originalText = cancelarViajeBtn.innerHTML;
+            cancelarViajeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelando...';
+            cancelarViajeBtn.disabled = true;
+            
+            try {
+                // Actualizar estado del viaje a "cancelado" en Firestore
+                const viajeRef = doc(db, "viajes", currentViajeId);
+                await updateDoc(viajeRef, {
+                    estado: "cancelado",
+                    fechaCancelacion: serverTimestamp()
+                });
+                
+                // Limpiar listeners y variables
+                if (unsubViaje) {
+                    unsubViaje();
+                    unsubViaje = null;
+                }
+                
+                // Limpiar sessionStorage
+                sessionStorage.removeItem('viajeId');
+                
+                // Ocultar confirmación y mostrar formulario
+                confirmacionCard.style.display = 'none';
+                showCard(formCard);
+                
+                // Resetear variables
+                currentViajeId = null;
+                btnSolicitar.disabled = false;
+                btnSolicitar.innerHTML = '<i class="fas fa-paper-plane"></i> Solicitar moto';
+                
+                // Mostrar mensaje de éxito
+                alert('✅ Viaje cancelado correctamente');
+                
+            } catch (err) {
+                console.error('Error al cancelar viaje:', err);
+                alert('❌ Error al cancelar el viaje. Intenta de nuevo.');
+            } finally {
+                // Restaurar botón
+                cancelarViajeBtn.innerHTML = originalText;
+                cancelarViajeBtn.disabled = false;
+            }
+        }
+
+        btnSolicitar.addEventListener('click', async () => {
+            if (!currentUser || !currentUserData) {
+                alert('Debes iniciar sesión primero');
+                return;
+            }
+
+            const origen = origenTextarea.value.trim();
+            const destino = zonaSelect.value.trim();
+            const gpsUrl = gpsUrlHidden.value;
+
+            if (!origen) { alert('📍 Indica dónde te recogemos'); return; }
+            if (!destino) { alert('🏁 Selecciona a dónde vas'); return; }
+
+            btnSolicitar.disabled = true;
+            btnSolicitar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            try {
+                const viajeRef = await addDoc(collection(db, "viajes"), {
+                    cliente: {
+                        nombre: currentUserData.nombre,
+                        telefono: currentUserData.telefono,
+                        origen: origen,
+                        destino: destino,
+                        gps: gpsUrl || "No compartida",
+                        uid: currentUser.uid,
+                        email: currentUser.email
+                    },
+                    estado: "abierto",
+                    motorizadoId: null,
+                    motorizadoNombre: null,
+                    fechaHora: serverTimestamp()
+                });
+
+                // Actualizar contador de viajes del cliente
+                const q = query(collection(db, "clientesMototaxi"), where("uid", "==", currentUser.uid));
+                const snap = await getDocs(q);
+                if (!snap.empty) {
+                    await updateDoc(doc(db, "clientesMototaxi", snap.docs[0].id), {
+                        totalViajes: increment(1),
+                        ultimoViaje: serverTimestamp()
+                    });
+                }
+
+                currentViajeId = viajeRef.id;
+                sessionStorage.setItem('viajeId', currentViajeId);
+
+                formCard.classList.add('hidden');
+                confirmacionCard.style.display = 'block';
+                document.getElementById('resumenViaje').innerHTML = `
+                    <div><i class="fas fa-user"></i><strong>${currentUserData.nombre}</strong></div>
+                    <div><i class="fas fa-phone-alt"></i>${currentUserData.telefono}</div>
+                    <div><i class="fas fa-map-marker-alt"></i><strong>Origen:</strong> ${origen}</div>
+                    <div><i class="fas fa-flag-checkered"></i><strong>Destino:</strong> ${destino}</div>
+                    ${gpsUrl ? `<div><i class="fas fa-map-pin"></i><a href="${gpsUrl}" target="_blank" style="color:var(--amber); text-decoration:none;">Ver en mapa 🗺️</a></div>` : ''}
+                `;
+
+                escucharViaje(currentViajeId);
+
+            } catch (err) {
+                console.error('Error Firestore:', err);
+                alert('❌ No se pudo enviar la solicitud. Revisa tu conexión e intenta de nuevo.');
+                btnSolicitar.disabled = false;
+                btnSolicitar.innerHTML = '<i class="fas fa-paper-plane"></i> Solicitar moto';
+            }
+        });
+
+        btnGps.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                gpsStatus.textContent = '❌ GPS no disponible en este dispositivo';
+                gpsStatus.style.color = '#e57373';
+                return;
+            }
+
+            gpsStatus.textContent = '📡 Obteniendo ubicación...';
+            gpsStatus.style.color = '#f0e68c';
+
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const url = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                    gpsUrlHidden.value = url;
+                    gpsStatus.innerHTML = '✅ Ubicación capturada correctamente';
+                    gpsStatus.style.color = '#4caf82';
+                },
+                err => {
+                    const msgs = {
+                        1: '❌ Permiso denegado — actívalo en la configuración',
+                        2: '❌ Señal no disponible en este momento',
+                        3: '❌ Tiempo agotado — intenta de nuevo'
+                    };
+                    gpsStatus.textContent = msgs[err.code] || '❌ No se pudo obtener el GPS';
+                    gpsStatus.style.color = '#e57373';
+                },
+                { timeout: 10000, maximumAge: 0 }
+            );
+        });
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                await handleUserLogin(user);
+                const savedViajeId = sessionStorage.getItem('viajeId');
+                if (savedViajeId && !currentViajeId) {
+                    currentViajeId = savedViajeId;
+                    escucharViaje(currentViajeId);
+                    formCard.classList.add('hidden');
+                    confirmacionCard.style.display = 'block';
+                }
+            } else {
+                currentUser = null;
+                currentUserData = null;
+                userBar.classList.add('hidden');
+                showCard(loginCard);
+                resetUI();
+            }
+        });
+
+        logoutBtn.addEventListener('click', handleLogout);
+        googleLoginBtn.addEventListener('click', handleGoogleLogin);
+        registrarTelefonoBtn.addEventListener('click', handleRegistrarTelefono);
+        cancelarViajeBtn.addEventListener('click', cancelarViaje);
+        nuevoViajeBtn.addEventListener('click', () => {
+            confirmacionCard.style.display = 'none';
+            showCard(formCard);
+            if (unsubViaje) unsubViaje();
+            unsubViaje = null;
+            currentViajeId = null;
+            sessionStorage.removeItem('viajeId');
+            btnSolicitar.disabled = false;
+            btnSolicitar.innerHTML = '<i class="fas fa-paper-plane"></i> Solicitar moto';
+        });
+    </script>
+</body>
